@@ -4,8 +4,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:34117",
-      "sslPort": 44388
+      "applicationUrl": "http://localhost:30025",
+      "sslPort": 44368
     }
   },
   "profiles": {
@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "backend": {
+    "AKHWebshop": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",

@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKHWebshop", "AKHWebshop\AKHWebshop.csproj", "{CD852166-5631-4296-9200-0C81854E4267}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKHWebshop.Test", "AKHWebshop.Test\AKHWebshop.Test.csproj", "{2DF59DBA-197D-46F2-A998-BACA3A5C4B6B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD852166-5631-4296-9200-0C81854E4267}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD852166-5631-4296-9200-0C81854E4267}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD852166-5631-4296-9200-0C81854E4267}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD852166-5631-4296-9200-0C81854E4267}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DF59DBA-197D-46F2-A998-BACA3A5C4B6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DF59DBA-197D-46F2-A998-BACA3A5C4B6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DF59DBA-197D-46F2-A998-BACA3A5C4B6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DF59DBA-197D-46F2-A998-BACA3A5C4B6B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
