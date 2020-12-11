@@ -1,0 +1,25 @@
+name: .NET Core
+
+on: push
+
+jobs:
+  build:
+    env:
+      working-directory: ./backend/AKHWebshop
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      working-directory: ${{env.working-directory}}
+      run: dotnet restore
+    - name: Build
+      working-directory: ${{env.working-directory}}
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      working-directory: ${{env.working-directory}}
+      run: dotnet test --no-restore --verbosity normal
