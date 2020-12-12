@@ -240,3 +240,4 @@ bin
 obj
 packages
 .idea
+docker-compose.override.yml
