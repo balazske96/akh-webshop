@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,19 +24,34 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetProducts()
+        [Route("{id?}")]
+        public JsonResult GetProducts(string? id, [FromQuery] int? page, [FromQuery] int? limit)
         {
-            JsonResult result = new JsonResult(_dataContext.Products.ToList());
-            result.ContentType = "application/json";
-            result.StatusCode = 200;
-            return result;
-        }
+            if (id != null)
+            {
+                Product selectedProduct = _dataContext.Products.Find(Guid.Parse(id));
+                return new JsonResult(selectedProduct)
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+            }
 
-        [Route("{id}")]
-        [HttpGet]
-        public JsonResult GetProductsById(string id)
-        {
-            throw new NotImplementedException();
+            if (limit.HasValue)
+            {
+                int newPageValue = page ?? 1;
+                int skip = newPageValue * limit.Value;
+                return new JsonResult(_dataContext.Products.Skip(skip).Take(limit.Value).ToList())
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+            }
+
+            JsonResult result =
+                new JsonResult(_dataContext.Products.ToList())
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+            return result;
         }
     }
 }
