@@ -5,6 +5,7 @@ using System.Linq;
 using AKHWebshop.Models.Shop;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,7 @@ namespace AKHWebshop.Controllers
 
         [HttpGet]
         [Route("{id?}")]
-        public JsonResult GetProducts(string? id, [FromQuery] int? page, [FromQuery] int? limit)
+        public JsonResult GetProducts(string? id = null, [FromQuery] int? page = null, [FromQuery] int? limit = null)
         {
             if (id != null)
             {
@@ -52,6 +53,24 @@ namespace AKHWebshop.Controllers
                     ContentType = "application/json", StatusCode = 200
                 };
             return result;
+        }
+
+        [HttpPost]
+        public JsonResult CreateProduct([FromBody] Product product)
+        {
+            try
+            {
+                _dataContext.Add(product);
+                _dataContext.SaveChanges();
+                return new JsonResult(product);
+            }
+            catch (InvalidOperationException)
+            {
+                return new JsonResult("couldn't create product")
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
         }
     }
 }

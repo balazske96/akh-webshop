@@ -14,7 +14,7 @@ namespace AKHWebshop.Models.Shop.Data
         [JsonPropertyName("product_id")]
         [Column(TypeName = "varchar(36)")]
         public Guid ProductId { get; set; }
-        
+
         [JsonPropertyName("size")]
         [Column(TypeName = "enum")]
         public Size Size { get; set; }

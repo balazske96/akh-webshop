@@ -25,6 +25,12 @@ namespace AKHWebshop.Test
             _shopDataContext = new ShopDataContext(options);
         }
 
+        private ProductController CreateTestController()
+        {
+            ILogger<Product> logger = new Logger<Product>(new LoggerFactory());
+            return new ProductController(logger, _shopDataContext);
+        }
+
         [Fact]
         public void GetProductsGivesBackSameProducts()
         {
@@ -83,9 +89,10 @@ namespace AKHWebshop.Test
 
             ProductController productController = this.CreateTestController();
 
-            JsonResult expectedResult = new JsonResult(expectedTestProducts);
-            expectedResult.ContentType = "application/json";
-            expectedResult.StatusCode = 200;
+            JsonResult expectedResult = new JsonResult(expectedTestProducts)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
 
             JsonResult actualResult = productController.GetProducts(null, null, null);
             Assert.Equal(expectedResult.ToString(), actualResult.ToString());
@@ -111,7 +118,7 @@ namespace AKHWebshop.Test
                 };
             _shopDataContext.Add(expectedTestProducts);
 
-            ProductController productController = this.CreateTestController();
+            ProductController productController = CreateTestController();
 
             JsonResult expectedResult = new JsonResult(expectedTestProducts);
             expectedResult.ContentType = "application/json";
@@ -179,21 +186,74 @@ namespace AKHWebshop.Test
             _shopDataContext.AddRange(expectedTestProducts);
             _shopDataContext.SaveChanges();
 
-            ProductController productController = this.CreateTestController();
+            ProductController productController = CreateTestController();
 
             JsonResult actualJsonResult1 = productController.GetProducts(null, 2, 2);
             JsonResult actualJsonResult2 = productController.GetProducts(null, null, 3);
             JsonResult actualJsonResult3 = productController.GetProducts(null, 3, 1);
+            JsonResult actualJsonResult4 = productController.GetProducts(null, 10, 2);
 
             Assert.Equal(2, ((List<Product>) actualJsonResult1.Value).Count);
             Assert.Equal(3, ((List<Product>) actualJsonResult2.Value).Count);
             Assert.Single(((List<Product>) actualJsonResult3.Value));
+            Assert.Empty((List<Product>) actualJsonResult4.Value);
         }
 
-        private ProductController CreateTestController()
+        [Fact]
+        public void CreateProductShouldCreateANewProduct()
         {
-            ILogger<Product> logger = new Logger<Product>(new LoggerFactory());
-            return new ProductController(logger, _shopDataContext);
+            Product newProduct = new Product()
+            {
+                Name = "pulcsi",
+                DisplayName = "AKH Crewneck Pulóver",
+                ImageName = "crewneck.jpg",
+                Sizes = new List<SizeRecord>
+                {
+                    new SizeRecord() {Quantity = 3, Size = Size.XL}
+                }
+            };
+
+            ProductController productController = CreateTestController();
+            productController.CreateProduct(newProduct);
+
+
+            JsonResult expectedResult = new JsonResult(newProduct)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+
+            JsonResult actualResult = productController.GetProducts(newProduct.Id.ToString());
+
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+        }
+
+        [Fact]
+        public void CreateNewProductWithSameSizeRecordReturn420()
+        {
+            Product newProduct = new Product()
+            {
+                Name = "pulcsi",
+                DisplayName = "AKH Crewneck Pulóver",
+                ImageName = "crewneck.jpg",
+                Sizes = new List<SizeRecord>
+                {
+                    new SizeRecord() {Quantity = 3, Size = Size.XL},
+                    new SizeRecord() {Quantity = 3, Size = Size.XL}
+                }
+            };
+
+            ProductController productController = CreateTestController();
+            productController.CreateProduct(newProduct);
+
+
+            JsonResult expectedResult = new JsonResult("couldn't create product")
+            {
+                ContentType = "application/json", StatusCode = 420
+            };
+
+            JsonResult actualResult = productController.GetProducts(newProduct.Id.ToString());
+
+            Assert.Equal(expectedResult.ToString(), actualResult.ToString());
         }
     }
 }
