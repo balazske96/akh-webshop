@@ -284,5 +284,42 @@ namespace AKHWebshop.Test
 
             Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
         }
+
+        [Fact]
+        public void UpdateProductShouldReturn420()
+        {
+            Product newProduct = new Product()
+            {
+                Name = "pulcsi",
+                DisplayName = "AKH Crewneck Pulóver",
+                ImageName = "crewneck.jpg",
+                Sizes = new List<SizeRecord>
+                {
+                    new SizeRecord() {Quantity = 3, Size = Size.XL}
+                }
+            };
+
+            ProductController productController = CreateTestController();
+            JsonResult actualResult = productController.CreateProduct(newProduct);
+
+            JsonResult expectedResult = new JsonResult(newProduct)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+
+            newProduct.Sizes.Add(new SizeRecord() {Quantity = 2, Size = Size.S});
+            newProduct.Id = Guid.Empty;
+
+            JsonResult newExpectedResult = new JsonResult("couldn't create product")
+            {
+                ContentType = "application/json", StatusCode = 420
+            };
+            
+            JsonResult newActualResult = productController.UpdateProduct(newProduct);
+
+            Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
+        }
     }
 }

@@ -60,7 +60,7 @@ namespace AKHWebshop.Controllers
         {
             try
             {
-                _dataContext.Add(product);
+                _dataContext.Products.Add(product);
                 _dataContext.SaveChanges();
                 return new JsonResult(product);
             }
@@ -76,7 +76,19 @@ namespace AKHWebshop.Controllers
         [HttpPut]
         public JsonResult UpdateProduct([FromBody] Product product)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _dataContext.Update(product);
+                _dataContext.SaveChanges();
+                return new JsonResult(product);
+            }
+            catch (InvalidOperationException)
+            {
+                return new JsonResult("couldn't create product")
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
         }
     }
 }
