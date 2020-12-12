@@ -72,5 +72,11 @@ namespace AKHWebshop.Controllers
                 };
             }
         }
+
+        [HttpPut]
+        public JsonResult UpdateProduct([FromBody] Product product)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -214,15 +214,13 @@ namespace AKHWebshop.Test
             };
 
             ProductController productController = CreateTestController();
-            productController.CreateProduct(newProduct);
+            JsonResult actualResult = productController.CreateProduct(newProduct);
 
 
             JsonResult expectedResult = new JsonResult(newProduct)
             {
                 ContentType = "application/json", StatusCode = 200
             };
-
-            JsonResult actualResult = productController.GetProducts(newProduct.Id.ToString());
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
         }
@@ -243,17 +241,48 @@ namespace AKHWebshop.Test
             };
 
             ProductController productController = CreateTestController();
-            productController.CreateProduct(newProduct);
-
+            JsonResult actualResult = productController.CreateProduct(newProduct);
 
             JsonResult expectedResult = new JsonResult("couldn't create product")
             {
                 ContentType = "application/json", StatusCode = 420
             };
 
-            JsonResult actualResult = productController.GetProducts(newProduct.Id.ToString());
-
             Assert.Equal(expectedResult.ToString(), actualResult.ToString());
+        }
+
+        [Fact]
+        public void UpdateProductShouldUpdateSuccessfully()
+        {
+            Product newProduct = new Product()
+            {
+                Name = "pulcsi",
+                DisplayName = "AKH Crewneck Pulóver",
+                ImageName = "crewneck.jpg",
+                Sizes = new List<SizeRecord>
+                {
+                    new SizeRecord() {Quantity = 3, Size = Size.XL}
+                }
+            };
+
+            ProductController productController = CreateTestController();
+            JsonResult actualResult = productController.CreateProduct(newProduct);
+
+
+            JsonResult expectedResult = new JsonResult(newProduct)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+
+            newProduct.Sizes.Add(new SizeRecord() {Quantity = 2, Size = Size.S});
+
+            JsonResult newExpectedResult = new JsonResult(newProduct)
+                {ContentType = "application/json", StatusCode = 200};
+            JsonResult newActualResult = productController.UpdateProduct(newProduct);
+
+            Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
         }
     }
 }
