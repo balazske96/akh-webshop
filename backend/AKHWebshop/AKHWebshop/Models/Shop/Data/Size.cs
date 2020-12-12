@@ -14,7 +14,6 @@ namespace AKHWebshop.Models.Shop.Data
         L,
         XL,
         XXL,
-        XXXL,
-        XXXXXl
+        XXXL
     }
 }

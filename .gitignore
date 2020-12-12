@@ -232,3 +232,11 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+*.suo
+*.user
+_ReSharper.*
+bin
+obj
+packages
+.idea

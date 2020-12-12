@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AKHWebshop.Models.Shop;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace AKHWebshop.Controllers
@@ -23,9 +25,17 @@ namespace AKHWebshop.Controllers
         [HttpGet]
         public JsonResult GetProducts()
         {
-            return new JsonResult(
-                _dataContext.Products.ToList()
-            );
+            JsonResult result = new JsonResult(_dataContext.Products.ToList());
+            result.ContentType = "application/json";
+            result.StatusCode = 200;
+            return result;
+        }
+
+        [Route("{id}")]
+        [HttpGet]
+        public JsonResult GetProductsById(string id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
