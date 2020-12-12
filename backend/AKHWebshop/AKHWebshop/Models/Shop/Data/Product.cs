@@ -8,31 +8,30 @@ using System.Text.Json.Serialization;
 
 namespace AKHWebshop.Models.Shop.Data
 {
+    [Table("product")]
     public class Product
     {
-        
         [Required]
         [JsonPropertyName("id")]
-        [Column(TypeName = "varchar(36)")]
+        [Column("id", TypeName = "varchar(36)")]
         public Guid Id { get; set; }
 
         [JsonPropertyName("name")]
+        [Column("name", TypeName = "varchar(255)")]
         public string Name { get; set; }
 
         [Required]
         [JsonPropertyName("display_name")]
-        [Column(TypeName = "varchar(255)")]
+        [Column("display_name", TypeName = "varchar(255)")]
         public string DisplayName { get; set; }
 
-        [Required]
         [JsonPropertyName("quantity")]
-        [Column(TypeName = "smallint unsigned")]
+        [Column("sizes", TypeName = "smallint unsigned")]
         public List<SizeRecord> Sizes { get; set; }
-        
+
 
         [JsonPropertyName("image_name")]
-        [Column(TypeName = "varchar(255)")]
+        [Column("image_name", TypeName = "varchar(255)")]
         public string ImageName { get; set; }
-
     }
 }

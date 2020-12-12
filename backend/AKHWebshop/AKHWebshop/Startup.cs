@@ -32,12 +32,8 @@ namespace AKHWebshop
             services.AddLogging();
             services.AddDbContextPool<ShopDataContext>(options =>
             {
-                options.UseMySql(
-                    Configuration["Database:ConnectionString"],
-                    new MySqlServerVersion(
-                        new Version(8, 0)
-                    )
-                );
+                string connectionString = Configuration["Database:ConnectionString"];
+                options.UseMySql(connectionString);
             });
         }
 
