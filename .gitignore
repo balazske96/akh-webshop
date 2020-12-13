@@ -243,3 +243,4 @@ packages
 docker-compose.override.yml
 .env
 appsettings.json
+appsettings.Development.json
