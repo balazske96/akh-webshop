@@ -14,6 +14,7 @@ namespace AKHWebshop.Models.Shop.Data
     {
         [Required]
         [JsonPropertyName("product_id")]
+        [JsonIgnore]
         [Column("product_id", TypeName = "varchar(36)")]
         public Guid ProductId { get; set; }
 

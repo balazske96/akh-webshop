@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,45 +25,50 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        [Route("{id?}")]
-        public JsonResult GetProducts(string? id = null, [FromQuery] int? page = null, [FromQuery] int? limit = null)
+        public JsonResult GetAllProduct([FromQuery] int? page = null, [FromQuery] int? limit = null)
         {
-            if (id != null)
-            {
-                Product selectedProduct = _dataContext.Products.Find(Guid.Parse(id));
-                if (selectedProduct != null)
-                {
-                    return new JsonResult(selectedProduct)
-                    {
-                        ContentType = "application/json", StatusCode = 200
-                    };
-                }
-
-                return new JsonResult(new {error = "product not found"})
-                {
-                    ContentType = "application/json", StatusCode = 420
-                };
-            }
-
             if (limit.HasValue)
             {
                 int newPageValue = page ?? 1;
                 int skip = newPageValue * limit.Value;
-                return new JsonResult(_dataContext.Products.Skip(skip).Take(limit.Value).ToList())
+                return new JsonResult(_dataContext.Products.Include(product => product.Amount).Skip(skip)
+                    .Take(limit.Value)
+                    .ToList())
                 {
                     ContentType = "application/json", StatusCode = 200
                 };
             }
 
             JsonResult result =
-                new JsonResult(_dataContext.Products.ToList())
+                new JsonResult(_dataContext.Products.Include(product => product.Amount))
                 {
                     ContentType = "application/json", StatusCode = 200
                 };
             return result;
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public JsonResult GetProductById(string id)
+        {
+            Product? selectedProduct = _dataContext.Products.Include(product => product.Amount)
+                .FirstOrDefault(product => product.Id == Guid.Parse(id));
+            if (selectedProduct != null)
+            {
+                return new JsonResult(selectedProduct)
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+            }
+
+            return new JsonResult(new {error = "product not found"})
+            {
+                ContentType = "application/json", StatusCode = 420
+            };
+        }
+
         [HttpPost]
+        [Route("create")]
         public JsonResult CreateProduct([FromBody] Product product)
         {
             try
@@ -81,7 +87,8 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpPut]
-        public JsonResult UpdateProduct([FromBody] Product product)
+        [Route("update/{id?}")]
+        public JsonResult UpdateProduct(string? id, [FromBody] Product product)
         {
             try
             {
@@ -91,11 +98,57 @@ namespace AKHWebshop.Controllers
             }
             catch (InvalidOperationException)
             {
-                return new JsonResult(new {error = "couldn't create product"})
+                return new JsonResult(new {error = "couldn't update product"})
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
             }
+        }
+
+        [HttpPut]
+        [Route("update-amount/{id}")]
+        public JsonResult UpdateProductAmount(string id, [FromBody] List<SizeRecord> sizeRecords)
+        {
+            Product? subjectProduct =
+                _dataContext.Products.Include(product => product.Amount)
+                    .FirstOrDefault(product => product.Id == Guid.Parse(id));
+            if (subjectProduct == null)
+            {
+                return new JsonResult(new {error = "the product with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+            subjectProduct.Amount = sizeRecords;
+            _dataContext.Products.Update(subjectProduct);
+            _dataContext.SaveChanges();
+
+            return new JsonResult(subjectProduct)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+        }
+
+        [HttpDelete]
+        [Route("delete/{id}")]
+        public JsonResult DeleteProduct(string id)
+        {
+            Product subject = _dataContext.Products.Find(Guid.Parse(id));
+            if (subject == null)
+            {
+                return new JsonResult(new {error = "product with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+            _dataContext.Products.Remove(subject);
+            _dataContext.SaveChanges();
+            return new JsonResult(new {message = "product deleted"})
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
         }
     }
 }

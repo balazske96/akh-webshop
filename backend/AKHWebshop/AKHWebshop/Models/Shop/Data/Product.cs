@@ -25,9 +25,9 @@ namespace AKHWebshop.Models.Shop.Data
         [Column("display_name", TypeName = "varchar(255)")]
         public string DisplayName { get; set; }
 
-        [JsonPropertyName("quantity")]
-        [Column("sizes", TypeName = "smallint unsigned")]
-        public List<SizeRecord> Sizes { get; set; }
+
+        [JsonPropertyName("amount")]
+        public List<SizeRecord> Amount { get; set; }
 
 
         [JsonPropertyName("image_name")]
