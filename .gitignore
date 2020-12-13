@@ -242,3 +242,4 @@ packages
 .idea
 docker-compose.override.yml
 .env
+appsettings.json
