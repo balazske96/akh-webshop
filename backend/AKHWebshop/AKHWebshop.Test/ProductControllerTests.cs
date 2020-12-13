@@ -200,6 +200,16 @@ namespace AKHWebshop.Test
         }
 
         [Fact]
+        public void GetProductShouldReturn420()
+        {
+            ProductController controller = CreateTestController();
+            JsonResult actualResult = controller.GetProducts("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            JsonResult expectedResult = new JsonResult(new {error = "product not found"})
+                {ContentType = "application/json", StatusCode = 420};
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+        }
+
+        [Fact]
         public void CreateProductShouldCreateANewProduct()
         {
             Product newProduct = new Product()
@@ -243,7 +253,7 @@ namespace AKHWebshop.Test
             ProductController productController = CreateTestController();
             JsonResult actualResult = productController.CreateProduct(newProduct);
 
-            JsonResult expectedResult = new JsonResult("couldn't create product")
+            JsonResult expectedResult = new JsonResult(new {error = "couldn't create product"})
             {
                 ContentType = "application/json", StatusCode = 420
             };
@@ -312,11 +322,11 @@ namespace AKHWebshop.Test
             newProduct.Sizes.Add(new SizeRecord() {Quantity = 2, Size = Size.S});
             newProduct.Id = Guid.Empty;
 
-            JsonResult newExpectedResult = new JsonResult("couldn't create product")
+            JsonResult newExpectedResult = new JsonResult(new {error = "couldn't create product"})
             {
                 ContentType = "application/json", StatusCode = 420
             };
-            
+
             JsonResult newActualResult = productController.UpdateProduct(newProduct);
 
             Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());

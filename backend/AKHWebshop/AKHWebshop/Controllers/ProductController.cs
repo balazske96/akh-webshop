@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,9 +30,17 @@ namespace AKHWebshop.Controllers
             if (id != null)
             {
                 Product selectedProduct = _dataContext.Products.Find(Guid.Parse(id));
-                return new JsonResult(selectedProduct)
+                if (selectedProduct != null)
                 {
-                    ContentType = "application/json", StatusCode = 200
+                    return new JsonResult(selectedProduct)
+                    {
+                        ContentType = "application/json", StatusCode = 200
+                    };
+                }
+
+                return new JsonResult(new {error = "product not found"})
+                {
+                    ContentType = "application/json", StatusCode = 420
                 };
             }
 
@@ -66,7 +73,7 @@ namespace AKHWebshop.Controllers
             }
             catch (InvalidOperationException)
             {
-                return new JsonResult("couldn't create product")
+                return new JsonResult(new {error = "couldn't create product"})
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
@@ -84,7 +91,7 @@ namespace AKHWebshop.Controllers
             }
             catch (InvalidOperationException)
             {
-                return new JsonResult("couldn't create product")
+                return new JsonResult(new {error = "couldn't create product"})
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
