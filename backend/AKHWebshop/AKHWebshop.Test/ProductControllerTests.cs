@@ -193,7 +193,7 @@ namespace AKHWebshop.Test
             JsonResult actualJsonResult1 = productController.GetAllProduct(2, 2);
             JsonResult actualJsonResult2 = productController.GetAllProduct(null, 3);
             JsonResult actualJsonResult3 = productController.GetAllProduct(3, 1);
-            JsonResult actualJsonResult4 = productController.GetAllProduct(10, 2);
+            JsonResult actualJsonResult4 = productController.GetAllProduct(1000, 2);
 
             Assert.Equal(2, ((List<Product>) actualJsonResult1.Value).Count);
             Assert.Equal(3, ((List<Product>) actualJsonResult2.Value).Count);
@@ -209,6 +209,8 @@ namespace AKHWebshop.Test
             JsonResult expectedResult = new JsonResult(new {error = "product not found"})
                 {ContentType = "application/json", StatusCode = 420};
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -235,6 +237,8 @@ namespace AKHWebshop.Test
             };
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -257,6 +261,8 @@ namespace AKHWebshop.Test
             };
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -279,10 +285,12 @@ namespace AKHWebshop.Test
 
             JsonResult expectedResult = new JsonResult(new {error = "couldn't create product"})
             {
-                ContentType = "application/json", StatusCode = 420
+                ContentType = "application/json", StatusCode = 500
             };
 
-            Assert.Equal(expectedResult.ToString(), actualResult.ToString());
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -305,6 +313,8 @@ namespace AKHWebshop.Test
             };
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
 
 
             newProduct.Name = "pulóver";
@@ -313,7 +323,9 @@ namespace AKHWebshop.Test
                 {ContentType = "application/json", StatusCode = 200};
             JsonResult newActualResult = productController.UpdateProduct(newProduct.Id.ToString(), newProduct);
 
-            Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -341,6 +353,8 @@ namespace AKHWebshop.Test
             };
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
 
             List<SizeRecord> newAmount = new List<SizeRecord>
             {
@@ -356,7 +370,9 @@ namespace AKHWebshop.Test
                 newProduct.Id.ToString(), newAmount
             );
 
-            Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -382,6 +398,8 @@ namespace AKHWebshop.Test
             };
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
 
             JsonResult newExpectedResult =
                 new JsonResult(new {error = "the product with the specified id does not exist"})
@@ -399,7 +417,9 @@ namespace AKHWebshop.Test
             JsonResult newActualResult =
                 productController.UpdateProductAmount("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", amountToAdd);
 
-            Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]
@@ -425,18 +445,162 @@ namespace AKHWebshop.Test
             };
 
             Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
 
             newProduct.Amount.Add(new SizeRecord() {Quantity = 2, Size = Size.S});
             newProduct.Id = Guid.Empty;
 
-            JsonResult newExpectedResult = new JsonResult(new {error = "couldn't update product"})
-            {
-                ContentType = "application/json", StatusCode = 420
-            };
+            JsonResult newExpectedResult =
+                new JsonResult(new {error = "the product with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
 
             JsonResult newActualResult = productController.UpdateProduct(newProduct.Id.ToString(), newProduct);
 
-            Assert.Equal(newExpectedResult.Value.ToString(), newActualResult.Value.ToString());
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+        }
+
+        [Fact]
+        public void UpdateProductStatusShouldReturn420()
+        {
+            Guid guid = Guid.NewGuid();
+            Product testProduct = new Product()
+            {
+                Id = guid,
+                Amount = new List<SizeRecord>()
+                {
+                    new SizeRecord()
+                    {
+                        Quantity = 3,
+                        Size = Size.L
+                    }
+                },
+                DisplayName = "Akh Póló",
+                ImageName = "akh-polo.jpg",
+                Name = "akh-polo",
+                Status = ProductStatus.Active
+            };
+
+            _shopDataContext.Products.Add(testProduct);
+            _shopDataContext.SaveChanges();
+
+            ProductController controller = CreateTestController();
+            JsonResult expectedResult =
+                new JsonResult(new {error = "status cannot be sold out if the amount is bigger than zero"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+
+            testProduct.Status = ProductStatus.SoldOut;
+            testProduct.Amount = null;
+
+            JsonResult actualResult = controller.UpdateProduct(testProduct.Id.ToString(), testProduct);
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+        }
+
+        [Fact]
+        public void UpdateProductStatusShouldReturnNotFoundAnd420()
+        {
+            ProductController controller = CreateTestController();
+            JsonResult expectedResult =
+                new JsonResult(new {error = "the product with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+
+            Product testProduct = new Product() {Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")};
+
+            JsonResult actualResult =
+                controller.UpdateProduct("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", testProduct);
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+        }
+
+        [Fact]
+        public void UpdateProductShouldRestrictToNotProvideAmount()
+        {
+            Guid guid = Guid.NewGuid();
+            Product testProduct = new Product()
+            {
+                Id = guid,
+                Amount = new List<SizeRecord>()
+                {
+                    new SizeRecord()
+                    {
+                        Quantity = 3,
+                        Size = Size.L
+                    }
+                },
+                DisplayName = "Akh Póló",
+                ImageName = "akh-polo.jpg",
+                Name = "akh-polo",
+                Status = ProductStatus.Active
+            };
+
+            _shopDataContext.Products.Add(testProduct);
+            _shopDataContext.SaveChanges();
+
+            ProductController controller = CreateTestController();
+            JsonResult expectedResult =
+                new JsonResult(new {error = "amount shouldn't be provided on product update"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+
+            testProduct.Status = ProductStatus.SoldOut;
+
+            JsonResult actualResult = controller.UpdateProduct(testProduct.Id.ToString(), testProduct);
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+        }
+
+        [Fact]
+        public void UpdateProductShouldSuccessfullyUpdate()
+        {
+            Guid guid = Guid.NewGuid();
+            Product testProduct = new Product()
+            {
+                Id = guid,
+                Amount = new List<SizeRecord>()
+                {
+                    new SizeRecord()
+                    {
+                        Quantity = 3,
+                        Size = Size.L
+                    }
+                },
+                DisplayName = "Akh Póló",
+                ImageName = "akh-polo.jpg",
+                Name = "akh-polo",
+                Status = ProductStatus.Active
+            };
+
+            _shopDataContext.Products.Add(testProduct);
+            _shopDataContext.SaveChanges();
+
+            testProduct.Status = ProductStatus.Hidden;
+            testProduct.Amount = null;
+
+            ProductController controller = CreateTestController();
+            JsonResult expectedResult =
+                new JsonResult(testProduct)
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+
+
+            JsonResult actualResult = controller.UpdateProduct(testProduct.Id.ToString(), testProduct);
+            Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+            Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+            Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
         }
 
         [Fact]

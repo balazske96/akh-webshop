@@ -21,6 +21,9 @@ namespace AKHWebshop.Models.Shop.Data
             modelBuilder.Entity<Product>().HasIndex(product => product.DisplayName).IsUnique();
             modelBuilder.Entity<Product>().HasIndex(product => product.Name).IsUnique();
             modelBuilder.Entity<Product>().HasIndex(product => product.ImageName).IsUnique();
+            modelBuilder.Entity<Product>().HasIndex(product => product.Status).IsUnique();
+            modelBuilder.Entity<Product>().Property(product => product.Status)
+                .HasDefaultValue(ProductStatus.Hidden);
 
             modelBuilder.Entity<SizeRecord>().Property(size => size.Size).HasDefaultValue(Size.UNDEFINED);
             modelBuilder.Entity<SizeRecord>().Property(size => size.Size).HasConversion<string>();

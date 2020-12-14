@@ -25,15 +25,14 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetAllProduct([FromQuery] int? page = null, [FromQuery] int? limit = null)
+        public JsonResult GetAllProduct([FromQuery] int? skip = null, [FromQuery] int? limit = null)
         {
             if (limit.HasValue)
             {
-                int newPageValue = page ?? 1;
-                int skip = newPageValue * limit.Value;
-                return new JsonResult(_dataContext.Products.Include(product => product.Amount).Skip(skip)
+                List<Product> products = _dataContext.Products.Include(product => product.Amount).Skip(skip ?? 0)
                     .Take(limit.Value)
-                    .ToList())
+                    .ToList();
+                return new JsonResult(products)
                 {
                     ContentType = "application/json", StatusCode = 200
                 };
@@ -68,45 +67,63 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpPost]
-        [Route("create")]
         public JsonResult CreateProduct([FromBody] Product product)
         {
             try
             {
                 _dataContext.Products.Add(product);
                 _dataContext.SaveChanges();
-                return new JsonResult(product);
+                return new JsonResult(product)
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException exception)
             {
+                _logger.Log(LogLevel.Error, exception.Message);
                 return new JsonResult(new {error = "couldn't create product"})
                 {
-                    ContentType = "application/json", StatusCode = 420
+                    ContentType = "application/json", StatusCode = 500
                 };
             }
         }
 
         [HttpPut]
-        [Route("update/{id?}")]
-        public JsonResult UpdateProduct(string? id, [FromBody] Product product)
+        [Route("{id}")]
+        public JsonResult UpdateProduct(string id, [FromBody] Product product)
         {
-            try
-            {
-                _dataContext.Update(product);
-                _dataContext.SaveChanges();
-                return new JsonResult(product);
-            }
-            catch (InvalidOperationException)
-            {
-                return new JsonResult(new {error = "couldn't update product"})
+            bool doesProductExist = _dataContext.Products.Any(prod => prod.Id == product.Id);
+            if (!doesProductExist)
+                return new JsonResult(new {error = "the product with the specified id does not exist"})
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
-            }
+
+            bool userTriesToUpdateAmountInProductModel = product.Amount != null;
+            if (userTriesToUpdateAmountInProductModel)
+                return new JsonResult(new {error = "amount shouldn't be provided on product update"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+
+            bool isAmountNotZero = _dataContext.SizeRecords.Any(sizeRec => sizeRec.ProductId == product.Id);
+            bool newStatusIsSoldOut = product.Status == ProductStatus.SoldOut;
+            if (isAmountNotZero && newStatusIsSoldOut)
+                return new JsonResult(new {error = "status cannot be sold out if the amount is bigger than zero"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+
+            _dataContext.Update(product);
+            _dataContext.SaveChanges();
+            return new JsonResult(product)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
         }
 
         [HttpPut]
-        [Route("update-amount/{id}")]
+        [Route("{id}/update-amount")]
         public JsonResult UpdateProductAmount(string id, [FromBody] List<SizeRecord> sizeRecords)
         {
             Product? subjectProduct =
@@ -131,7 +148,7 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpDelete]
-        [Route("delete/{id}")]
+        [Route("{id}")]
         public JsonResult DeleteProduct(string id)
         {
             Product subject = _dataContext.Products.Find(Guid.Parse(id));
