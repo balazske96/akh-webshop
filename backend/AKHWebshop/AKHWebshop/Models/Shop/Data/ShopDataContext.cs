@@ -13,7 +13,7 @@ namespace AKHWebshop.Models.Shop.Data
         public ShopDataContext(DbContextOptions<ShopDataContext> options) : base(options)
         {
         }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>().HasKey(prod => prod.Id);

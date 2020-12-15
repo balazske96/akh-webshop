@@ -69,23 +69,41 @@ namespace AKHWebshop.Controllers
         [HttpPost]
         public JsonResult CreateProduct([FromBody] Product product)
         {
-            try
+            bool amountContainsDuplication = product.DoesAmountContainSizeDuplication();
+            if (amountContainsDuplication)
             {
-                _dataContext.Products.Add(product);
-                _dataContext.SaveChanges();
-                return new JsonResult(product)
+                return new JsonResult(new {error = "product model's amount cannot contains duplicated sizes"})
                 {
-                    ContentType = "application/json", StatusCode = 200
+                    ContentType = "application/json", StatusCode = 420
                 };
             }
-            catch (InvalidOperationException exception)
+
+            bool productNameAlreadyExists = _dataContext.Products.Any(prod => prod.Name == product.Name);
+            if (productNameAlreadyExists)
             {
-                _logger.Log(LogLevel.Error, exception.Message);
-                return new JsonResult(new {error = "couldn't create product"})
+                return new JsonResult(new {error = "product with the specified name already exists"})
                 {
-                    ContentType = "application/json", StatusCode = 500
+                    ContentType = "application/json", StatusCode = 420
                 };
             }
+
+            bool productDisplayNameAlreadyExists =
+                _dataContext.Products.Any(prod => prod.DisplayName == product.DisplayName);
+            if (productDisplayNameAlreadyExists)
+            {
+                return new JsonResult(new {error = "product with the specified display name already exists"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+
+            _dataContext.Products.Add(product);
+            _dataContext.SaveChanges();
+            return new JsonResult(product)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
         }
 
         [HttpPut]
@@ -129,6 +147,7 @@ namespace AKHWebshop.Controllers
             Product? subjectProduct =
                 _dataContext.Products.Include(product => product.Amount)
                     .FirstOrDefault(product => product.Id == Guid.Parse(id));
+
             if (subjectProduct == null)
             {
                 return new JsonResult(new {error = "the product with the specified id does not exist"})
@@ -138,6 +157,7 @@ namespace AKHWebshop.Controllers
             }
 
             subjectProduct.Amount = sizeRecords;
+
             _dataContext.Products.Update(subjectProduct);
             _dataContext.SaveChanges();
 
@@ -151,7 +171,7 @@ namespace AKHWebshop.Controllers
         [Route("{id}")]
         public JsonResult DeleteProduct(string id)
         {
-            Product subject = _dataContext.Products.Find(Guid.Parse(id));
+            Product? subject = _dataContext.Products.Find(Guid.Parse(id));
             if (subject == null)
             {
                 return new JsonResult(new {error = "product with the specified id does not exist"})
