@@ -87,6 +87,15 @@ namespace AKHWebshop.Controllers
                 };
             }
 
+            bool imageNameAlreadyExists = _dataContext.Products.Any(prod => prod.ImageName == product.ImageName);
+            if (imageNameAlreadyExists)
+            {
+                return new JsonResult(new {error = "product with the specified image name already exists"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
             bool productDisplayNameAlreadyExists =
                 _dataContext.Products.Any(prod => prod.DisplayName == product.DisplayName);
             if (productDisplayNameAlreadyExists)

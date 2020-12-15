@@ -419,6 +419,52 @@ namespace AKHWebshop.Test
         }
 
         [Fact]
+        public void CreateNewProductWithAlreadyExistingImageNameShouldReturn420()
+        {
+            using (ShopDataContext shopDataContext = CreateDataContext())
+            {
+                Product newProduct = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+
+                shopDataContext.Add(newProduct);
+                shopDataContext.SaveChanges();
+
+                Product anotherProduct = new Product()
+                {
+                    Name = "pulcsi-2",
+                    DisplayName = "AKH Crewneck Pulóverke",
+                    ImageName = "crewneck.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                ProductController productController = CreateTestController(shopDataContext);
+                JsonResult actualResult = productController.CreateProduct(anotherProduct);
+
+                JsonResult expectedResult =
+                    new JsonResult(new {error = "product with the specified image name already exists"})
+                    {
+                        ContentType = "application/json", StatusCode = 420
+                    };
+
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
         public void UpdateProductDetailsShouldUpdateSuccessfully()
         {
             using (ShopDataContext shopDataContext = CreateDataContext())
