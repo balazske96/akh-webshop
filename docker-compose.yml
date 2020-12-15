@@ -13,6 +13,12 @@ services:
     env_file:
       - ./backend/AKHWebshop/AKHWebshop/.env
 
+  nextserver:
+    build:
+      context: ./frontend
+    ports:
+      - 3000
+
   database:
     image: mysql:8.0
     ports:
