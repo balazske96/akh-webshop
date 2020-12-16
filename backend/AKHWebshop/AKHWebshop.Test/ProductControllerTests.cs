@@ -5,6 +5,7 @@ using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,7 +24,7 @@ namespace AKHWebshop.Test
         private ShopDataContext CreateDataContext()
         {
             DbContextOptionsBuilder<ShopDataContext> builder = new DbContextOptionsBuilder<ShopDataContext>();
-            builder.UseInMemoryDatabase("ShopDatabase", new InMemoryDatabaseRoot());
+            builder.UseInMemoryDatabase("ShopDatabase_" + DateTime.Now.ToFileTimeUtc());
             var options = builder.Options;
             ShopDataContext newContext = new ShopDataContext(options);
             return newContext;
@@ -34,7 +35,6 @@ namespace AKHWebshop.Test
             ILogger<Product> logger = new Logger<Product>(new LoggerFactory());
             return new ProductController(logger, shopDataContext);
         }
-
 
         [Fact]
         public void GetProductsGivesBackSameProducts()
@@ -795,6 +795,150 @@ namespace AKHWebshop.Test
 
 
                 JsonResult actualResult = controller.UpdateProduct(testProduct.Id.ToString(), testProduct);
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void UpdateProductNameShouldReturn420()
+        {
+            using (ShopDataContext shopDataContext = CreateDataContext())
+            {
+                Product newProduct = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                Product anotherProduct = new Product()
+                {
+                    Name = "pulcsi2",
+                    DisplayName = "Bestest pulóver",
+                    ImageName = "crewneck-2.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                shopDataContext.AddRange(newProduct, anotherProduct);
+                shopDataContext.SaveChanges();
+
+                anotherProduct.Name = "pulcsi";
+                anotherProduct.Amount = null;
+
+                ProductController productController = CreateTestController(shopDataContext);
+                JsonResult actualResult = productController.UpdateProduct(anotherProduct.Id.ToString(), anotherProduct);
+
+                JsonResult expectedResult =
+                    new JsonResult(new {error = "a product with the provided name already exists"})
+                    {
+                        ContentType = "application/json", StatusCode = 420
+                    };
+
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void UpdateDisplayNameShouldReturn420()
+        {
+            using (ShopDataContext shopDataContext = CreateDataContext())
+            {
+                Product newProduct = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                Product anotherProduct = new Product()
+                {
+                    Name = "pulcsi2",
+                    DisplayName = "Bestest pulóver",
+                    ImageName = "crewneck-2.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                shopDataContext.AddRange(newProduct, anotherProduct);
+                shopDataContext.SaveChanges();
+
+                anotherProduct.DisplayName = "AKH Crewneck Pulóver";
+                anotherProduct.Amount = null;
+
+                ProductController productController = CreateTestController(shopDataContext);
+                JsonResult actualResult = productController.UpdateProduct(anotherProduct.Id.ToString(), anotherProduct);
+
+                JsonResult expectedResult =
+                    new JsonResult(new {error = "a product with the provided display name already exists"})
+                    {
+                        ContentType = "application/json", StatusCode = 420
+                    };
+
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void UpdateImageNameShouldReturn420()
+        {
+            using (ShopDataContext shopDataContext = CreateDataContext())
+            {
+                Product newProduct = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                Product anotherProduct = new Product()
+                {
+                    Name = "pulcsi2",
+                    DisplayName = "Bestest pulóver",
+                    ImageName = "crewneck-2.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                shopDataContext.AddRange(newProduct, anotherProduct);
+                shopDataContext.SaveChanges();
+
+                anotherProduct.ImageName = "crewneck.jpg";
+                anotherProduct.Amount = null;
+
+                ProductController productController = CreateTestController(shopDataContext);
+                JsonResult actualResult = productController.UpdateProduct(anotherProduct.Id.ToString(), anotherProduct);
+
+                JsonResult expectedResult =
+                    new JsonResult(new {error = "a product with the provided image name already exists"})
+                    {
+                        ContentType = "application/json", StatusCode = 420
+                    };
+
                 Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
                 Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
                 Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);

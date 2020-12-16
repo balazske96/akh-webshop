@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AKHWebshop.Models.Mail;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +32,21 @@ namespace AKHWebshop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IAkhMailClient>(options =>
+            {
+                string bandAddress = Configuration["Mail:BandMail"];
+                string password = Configuration["Mail:Password"];
+
+                SmtpClient emailClient = new SmtpClient();
+                emailClient.Host = "smtp.google.com";
+                emailClient.Port = 587;
+                emailClient.Credentials = new NetworkCredential(bandAddress, password);
+                emailClient.EnableSsl = true;
+                emailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                emailClient.UseDefaultCredentials = false;
+
+                return new AkhMailClient(emailClient);
+            });
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
