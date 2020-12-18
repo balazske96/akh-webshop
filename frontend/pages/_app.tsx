@@ -1,13 +1,13 @@
-import { Provider } from "react-redux";
+import {Provider} from "react-redux";
 import "../styles/globals.css";
-import store from "../redux/store";
+import {ProvideShopContext} from "../utils/shop";
 
-function MyApp({ Component, pageProps }) {
-  return (
-    <Provider store={store}>
-      <Component {...pageProps} />
-    </Provider>
-  );
+function MyApp({Component, pageProps}) {
+    return (
+        <ProvideShopContext>
+            <Component {...pageProps} />
+        </ProvideShopContext>
+    );
 }
 
 export default MyApp;
