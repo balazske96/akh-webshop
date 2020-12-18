@@ -1,19 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace AKHWebshop.Models.Shop.Data
 {
-    [Table("size_record")]
-    public class SizeRecord
+    [Table("order_item")]
+    public class OrderItem
     {
         [Required]
-        [JsonIgnore]
+        [JsonPropertyName("order_id")]
+        [Column("order_id", TypeName = "varchar(36)")]
+        public Guid OrderId { get; set; }
+
+        [Required]
         [JsonPropertyName("product_id")]
         [Column("product_id", TypeName = "varchar(36)")]
         public Guid ProductId { get; set; }
@@ -25,8 +26,8 @@ namespace AKHWebshop.Models.Shop.Data
         public Size Size { get; set; }
 
         [Required]
-        [JsonPropertyName("quantity")]
-        [Column("quantity", TypeName = "smallint unsigned")]
-        public ushort Quantity { get; set; }
+        [JsonPropertyName("amount")]
+        [Column("amount")]
+        public ushort Amount { get; set; }
     }
 }

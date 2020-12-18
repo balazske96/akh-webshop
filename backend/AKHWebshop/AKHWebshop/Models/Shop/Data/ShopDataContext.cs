@@ -12,6 +12,8 @@ namespace AKHWebshop.Models.Shop.Data
 
         public DbSet<Order> Orders { get; set; }
 
+        public DbSet<OrderItem> OrderItems { get; set; }
+
         public ShopDataContext(DbContextOptions<ShopDataContext> options) : base(options)
         {
         }
@@ -29,6 +31,14 @@ namespace AKHWebshop.Models.Shop.Data
             modelBuilder.Entity<SizeRecord>().HasKey(size => new {size.ProductId, size.Size});
 
             modelBuilder.Entity<Order>().HasKey(order => order.Id);
+            modelBuilder.Entity<Order>().Property(order => order.Country).HasDefaultValue("Magyarország");
+            modelBuilder.Entity<Order>().Property(order => order.Paid).HasDefaultValue(false);
+            modelBuilder.Entity<Order>().Property(order => order.Shipped).HasDefaultValue(false);
+            modelBuilder.Entity<Order>().Property(order => order.PublicSpaceType).HasDefaultValue(PublicSpaceType.Utca);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasKey(orderItem => new {orderItem.OrderId, orderItem.ProductId, orderItem.Size});
+
 
             base.OnModelCreating(modelBuilder);
         }

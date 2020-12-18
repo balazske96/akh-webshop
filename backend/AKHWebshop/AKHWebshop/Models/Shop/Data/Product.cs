@@ -18,23 +18,23 @@ namespace AKHWebshop.Models.Shop.Data
         public Guid Id { get; set; }
 
         [JsonPropertyName("name")]
-        [Column("name", TypeName = "varchar(255)")]
+        [Column("name", TypeName = "varchar(256)")]
         public string Name { get; set; }
 
         [Required]
         [JsonPropertyName("display_name")]
-        [Column("display_name", TypeName = "varchar(255)")]
+        [Column("display_name", TypeName = "varchar(256)")]
         public string DisplayName { get; set; }
-        
+
         [JsonPropertyName("amount")] public List<SizeRecord> Amount { get; set; }
-        
+
         [JsonPropertyName("image_name")]
-        [Column("image_name", TypeName = "varchar(255)")]
+        [Column("image_name", TypeName = "varchar(256)")]
         public string ImageName { get; set; }
 
         [Required]
         [JsonPropertyName("status")]
-        [Column("status", TypeName = "varchar(255)")]
+        [Column("status", TypeName = "varchar(256)")]
         public ProductStatus Status { get; set; } = ProductStatus.Hidden;
 
         public bool DoesAmountContainSizeDuplication()
