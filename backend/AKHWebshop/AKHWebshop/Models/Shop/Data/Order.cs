@@ -90,5 +90,10 @@ namespace AKHWebshop.Models.Shop.Data
         public string Email { get; set; }
 
         [JsonPropertyName("order_items")] public List<OrderItem> OrderItems { get; set; }
+
+        public override string ToString()
+        {
+            return $"order_id:{Id.ToString()},first_name:{FirstName},last_name:{LastName},zip_code:{ZipCode}";
+        }
     }
 }

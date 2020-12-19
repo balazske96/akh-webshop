@@ -24,6 +24,7 @@ namespace AKHWebshop.Controllers
             _dataContext = dataContext;
         }
 
+        [HttpPost]
         public JsonResult CreateOrder([FromBody] Order order)
         {
             bool countryIsNull = order.Country == null;
@@ -176,6 +177,9 @@ namespace AKHWebshop.Controllers
 
             _dataContext.Add(order);
             _dataContext.SaveChanges();
+
+            _mailClient.SendNewOrderMail(order);
+
             return new JsonResult(order) {ContentType = "application/json", StatusCode = 200};
         }
     }

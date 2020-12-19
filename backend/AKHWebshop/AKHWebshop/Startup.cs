@@ -35,6 +35,7 @@ namespace AKHWebshop
             services.AddScoped<IAkhMailClient>(options =>
             {
                 string bandAddress = Configuration["Mail:BandMail"];
+                string username = Configuration["Mail:Credentials:User"];
                 string password = Configuration["Mail:Credentials:Password"];
                 string host = Configuration["Mail:Host"];
                 int port = Int32.Parse(Configuration["Mail:Port"]);
@@ -43,12 +44,12 @@ namespace AKHWebshop
                 SmtpClient emailClient = new SmtpClient();
                 emailClient.Host = host;
                 emailClient.Port = port;
-                emailClient.Credentials = new NetworkCredential(bandAddress, password);
+                emailClient.Credentials = new NetworkCredential(username, password);
                 emailClient.EnableSsl = ssl;
                 emailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
                 emailClient.UseDefaultCredentials = false;
 
-                return new AkhMailClient(emailClient);
+                return new AkhMailClient(emailClient, bandAddress);
             });
             services.AddControllers().AddJsonOptions(options =>
             {
