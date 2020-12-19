@@ -35,6 +35,11 @@ namespace AKHWebshop.Models.Shop.Data
         [Column("public_space_type", TypeName = "varchar(20)")]
         public PublicSpaceType PublicSpaceType { get; set; } = PublicSpaceType.Utca;
 
+        [Required]
+        [JsonPropertyName("public_space_name")]
+        [Column("public_space_name", TypeName = "varchar(256)")]
+        public string PublicSpaceName { get; set; }
+
         [JsonPropertyName("state")]
         [Column("state", TypeName = "varchar(256)")]
         public string State { get; set; }

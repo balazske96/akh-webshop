@@ -175,6 +175,15 @@ namespace AKHWebshop.Controllers
                 };
             }
 
+            bool publicSpaceIsNull = order.PublicSpaceName == null;
+            if (publicSpaceIsNull)
+            {
+                return new JsonResult(new {error = "public space name field cannot be null"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
             _dataContext.Add(order);
             _dataContext.SaveChanges();
 
