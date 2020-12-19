@@ -13,11 +13,11 @@ namespace AKHWebshop.Controllers
     public class OrderController : ControllerBase
 
     {
-        private ILogger<Order> _logger;
+        private ILogger<OrderController> _logger;
         private IAkhMailClient _mailClient;
         private ShopDataContext _dataContext;
 
-        public OrderController(ILogger<Order> logger, ShopDataContext dataContext, IAkhMailClient mailClient)
+        public OrderController(ILogger<OrderController> logger, ShopDataContext dataContext, IAkhMailClient mailClient)
         {
             _logger = logger;
             _mailClient = mailClient;
@@ -188,7 +188,7 @@ namespace AKHWebshop.Controllers
             _dataContext.SaveChanges();
 
             _mailClient.SendNewOrderMail(order);
-
+            
             return new JsonResult(order) {ContentType = "application/json", StatusCode = 200};
         }
     }

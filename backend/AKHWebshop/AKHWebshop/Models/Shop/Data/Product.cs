@@ -5,7 +5,9 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace AKHWebshop.Models.Shop.Data
 {
@@ -22,6 +24,7 @@ namespace AKHWebshop.Models.Shop.Data
         public string Name { get; set; }
 
         [Required]
+        [JsonProperty]
         [JsonPropertyName("display_name")]
         [Column("display_name", TypeName = "varchar(256)")]
         public string DisplayName { get; set; }

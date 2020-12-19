@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AKHWebshop.Models.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -17,29 +19,68 @@ namespace AKHWebshop.Models.Shop.Data
 
         public DbSet<OrderItem> OrderItems { get; set; }
 
+        public DbSet<AppUser> Users { get; set; }
+
+        public DbSet<IdentityRole> Roles { get; set; }
+
         public ShopDataContext(DbContextOptions<ShopDataContext> options) : base(options)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>().HasKey(prod => prod.Id);
-            modelBuilder.Entity<Product>().HasIndex(product => product.DisplayName).IsUnique();
-            modelBuilder.Entity<Product>().HasIndex(product => product.Name).IsUnique();
-            modelBuilder.Entity<Product>().HasIndex(product => product.ImageName).IsUnique();
-            modelBuilder.Entity<Product>().Property(product => product.Status).HasDefaultValue(ProductStatus.Hidden);
+            // Set the Product entity
+            modelBuilder.Entity<Product>(model =>
+            {
+                model.HasKey(prod => prod.Id);
+                model.HasIndex(product => product.DisplayName).IsUnique();
+                model.HasIndex(product => product.Name).IsUnique();
+                model.HasIndex(product => product.ImageName).IsUnique();
+                model.Property(product => product.Status).HasDefaultValue(ProductStatus.Hidden);
+            });
 
-            modelBuilder.Entity<SizeRecord>().Property(size => size.Size).HasDefaultValue(Size.UNDEFINED);
-            modelBuilder.Entity<SizeRecord>().Property(size => size.Size).HasConversion<string>();
-            modelBuilder.Entity<SizeRecord>().HasKey(size => new {size.ProductId, size.Size});
+            // Set the SizeRecord entity
+            modelBuilder.Entity<SizeRecord>(model =>
+            {
+                model.HasKey(size => new {size.ProductId, size.Size});
+                model.Property(size => size.Size).HasDefaultValue(Size.UNDEFINED);
+                model.Property(size => size.Size).HasConversion<string>();
+            });
 
-            modelBuilder.Entity<Order>().HasKey(order => order.Id);
-            modelBuilder.Entity<Order>().Property(order => order.Paid).HasDefaultValue(false);
-            modelBuilder.Entity<Order>().Property(order => order.Shipped).HasDefaultValue(false);
-            modelBuilder.Entity<Order>().Property(order => order.PublicSpaceType).HasDefaultValue(PublicSpaceType.Utca);
+            // Set the Order entity
+            modelBuilder.Entity<Order>(model =>
+            {
+                model.HasKey(order => order.Id);
+                model.Property(order => order.Paid).HasDefaultValue(false);
+                model.Property(order => order.Shipped).HasDefaultValue(false);
+                model.Property(order => order.PublicSpaceType).HasDefaultValue(PublicSpaceType.Utca);
+            });
 
-            modelBuilder.Entity<OrderItem>()
-                .HasKey(orderItem => new {orderItem.OrderId, orderItem.ProductId, orderItem.Size});
+            // Set the OrderItem entity
+            modelBuilder.Entity<OrderItem>(model =>
+            {
+                model.HasKey(orderItem => new {orderItem.OrderId, orderItem.ProductId, orderItem.Size});
+            });
+
+            // Set the AppUser entity
+            modelBuilder.Entity<AppUser>(model =>
+            {
+                model.ToTable("user");
+                model.Property(u => u.PasswordHash).HasColumnName("password_hash");
+                model.Property(u => u.Email).HasColumnName("email");
+                model.Property(u => u.UserName).HasColumnName("username");
+            });
+
+            // Set IdentityRole entity
+            modelBuilder.Entity<IdentityRole>(model =>
+            {
+                model.ToTable("role");
+                model.HasData(new List<IdentityRole>()
+                {
+                    new IdentityRole() {Name = "admin", NormalizedName = "Admin"},
+                    new IdentityRole() {Name = "user", NormalizedName = "User"}
+                });
+            });
 
             base.OnModelCreating(modelBuilder);
         }

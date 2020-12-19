@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AKHWebshop.Models.Shop;
 using AKHWebshop.Models.Shop.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -25,6 +26,7 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public JsonResult GetAllProduct([FromQuery] int? skip = null, [FromQuery] int? limit = null)
         {
             if (limit.HasValue)

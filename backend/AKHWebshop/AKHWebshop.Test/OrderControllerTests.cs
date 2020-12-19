@@ -24,7 +24,7 @@ namespace AKHWebshop.Test
 
         public OrderController CreateTestController(ShopDataContext shopDataContext)
         {
-            ILogger<Order> logger = new Logger<Order>(new LoggerFactory());
+            ILogger<OrderController> logger = new Logger<OrderController>(new LoggerFactory());
             SmtpClient emailClient = new SmtpClient();
             emailClient.Host = "mailer";
             emailClient.Port = 1025;
@@ -32,8 +32,9 @@ namespace AKHWebshop.Test
             emailClient.EnableSsl = false;
             emailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
             emailClient.UseDefaultCredentials = false;
+            ILogger<AkhMailClient> emailLogger = new Logger<AkhMailClient>(new LoggerFactory());
 
-            AkhMailClient mailClient = new AkhMailClient(emailClient);
+            AkhMailClient mailClient = new AkhMailClient(emailClient, emailLogger);
             return new OrderController(logger, shopDataContext, mailClient);
         }
 
