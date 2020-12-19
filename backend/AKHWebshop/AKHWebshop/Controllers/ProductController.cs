@@ -106,6 +106,15 @@ namespace AKHWebshop.Controllers
                 };
             }
 
+            bool productPriceIsNull = product.Price == 0;
+            if (productPriceIsNull)
+            {
+                return new JsonResult(new {error = "product's price cannot be null"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
 
             _dataContext.Products.Add(product);
             _dataContext.SaveChanges();
@@ -164,6 +173,15 @@ namespace AKHWebshop.Controllers
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
+            
+            bool productPriceIsNull = product.Price == 0;
+            if (productPriceIsNull)
+            {
+                return new JsonResult(new {error = "product's price cannot be null"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
 
             _dataContext.Update(product);
             _dataContext.SaveChanges();

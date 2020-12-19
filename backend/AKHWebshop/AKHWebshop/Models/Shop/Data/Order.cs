@@ -7,22 +7,12 @@ using System.Text.Json.Serialization;
 namespace AKHWebshop.Models.Shop.Data
 {
     [Table("order")]
-    public class Order
+    public class Order : DatedEntity
     {
         [Required]
         [JsonPropertyName("id")]
         [Column("id", TypeName = "varchar(36)")]
         public Guid Id { get; set; }
-
-        [Required]
-        [JsonPropertyName("created_at")]
-        [Column("created_at")]
-        public DateTime CreatedAt { get; } = DateTime.Now;
-
-        [Required]
-        [JsonPropertyName("updated_at")]
-        [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         [Required]
         [JsonPropertyName("country")]
@@ -46,7 +36,7 @@ namespace AKHWebshop.Models.Shop.Data
         public PublicSpaceType PublicSpaceType { get; set; } = PublicSpaceType.Utca;
 
         [JsonPropertyName("state")]
-        [Column("state", TypeName = "varchar(512)")]
+        [Column("state", TypeName = "varchar(256)")]
         public string State { get; set; }
 
         [Required]
@@ -56,11 +46,11 @@ namespace AKHWebshop.Models.Shop.Data
 
         [JsonPropertyName("floor")]
         [Column("floor")]
-        public byte Floor { get; set; }
+        public byte? Floor { get; set; }
 
         [JsonPropertyName("door")]
         [Column("door")]
-        public ushort Door { get; set; }
+        public ushort? Door { get; set; }
 
         [Required]
         [JsonPropertyName("shipped")]
@@ -73,9 +63,23 @@ namespace AKHWebshop.Models.Shop.Data
         public bool Paid { get; set; }
 
         [Required]
-        [JsonPropertyName("total")]
-        [Column("total")]
-        public uint Total { get; set; }
+        [JsonPropertyName("total_price")]
+        [Column("total_price")]
+        public uint TotalPrice { get; set; }
+
+        [Required]
+        [JsonPropertyName("first_name")]
+        [Column("first_name", TypeName = "varchar(256)")]
+        public string FirstName { get; set; }
+
+        [Required]
+        [JsonPropertyName("last_name")]
+        [Column("last_name", TypeName = "varchar(256)")]
+        public string LastName { get; set; }
+
+        [JsonPropertyName("comment")]
+        [Column("comment", TypeName = "varchar(256)")]
+        public string Comment { get; set; }
 
         [JsonPropertyName("order_items")] public List<OrderItem> OrderItems { get; set; }
     }

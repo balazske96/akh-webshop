@@ -37,6 +37,11 @@ namespace AKHWebshop.Models.Shop.Data
         [Column("status", TypeName = "varchar(256)")]
         public ProductStatus Status { get; set; } = ProductStatus.Hidden;
 
+        [Required]
+        [JsonPropertyName("price")]
+        [Column("price")]
+        public uint Price { get; set; }
+
         public bool DoesAmountContainSizeDuplication()
         {
             if (Amount == null)

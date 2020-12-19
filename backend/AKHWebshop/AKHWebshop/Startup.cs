@@ -35,13 +35,16 @@ namespace AKHWebshop
             services.AddScoped<IAkhMailClient>(options =>
             {
                 string bandAddress = Configuration["Mail:BandMail"];
-                string password = Configuration["Mail:Password"];
+                string password = Configuration["Mail:Credentials:Password"];
+                string host = Configuration["Mail:Host"];
+                int port = Int32.Parse(Configuration["Mail:Port"]);
+                bool ssl = Boolean.Parse(Configuration["Mail:Ssl"]);
 
                 SmtpClient emailClient = new SmtpClient();
-                emailClient.Host = "smtp.google.com";
-                emailClient.Port = 587;
+                emailClient.Host = host;
+                emailClient.Port = port;
                 emailClient.Credentials = new NetworkCredential(bandAddress, password);
-                emailClient.EnableSsl = true;
+                emailClient.EnableSsl = ssl;
                 emailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
                 emailClient.UseDefaultCredentials = false;
 

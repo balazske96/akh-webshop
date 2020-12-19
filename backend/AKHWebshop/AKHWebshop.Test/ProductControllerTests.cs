@@ -4,30 +4,19 @@ using AKHWebshop.Controllers;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace AKHWebshop.Test
 {
-    public class ProductControllerTests
+    public class ProductControllerTests : ControllerTesterBase
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
         public ProductControllerTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-        }
-
-        private ShopDataContext CreateDataContext()
-        {
-            DbContextOptionsBuilder<ShopDataContext> builder = new DbContextOptionsBuilder<ShopDataContext>();
-            builder.UseInMemoryDatabase("ShopDatabase_" + DateTime.Now.ToFileTimeUtc());
-            var options = builder.Options;
-            ShopDataContext newContext = new ShopDataContext(options);
-            return newContext;
         }
 
         private ProductController CreateTestController(ShopDataContext shopDataContext)
@@ -244,6 +233,7 @@ namespace AKHWebshop.Test
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
                     ImageName = "crewneck.jpg",
+                    Price = 5300,
                     Amount = new List<SizeRecord>
                     {
                         new SizeRecord() {Quantity = 3, Size = Size.XL}
@@ -275,7 +265,8 @@ namespace AKHWebshop.Test
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
-                    ImageName = "crewneck.jpg"
+                    ImageName = "crewneck.jpg",
+                    Price = 5300,
                 };
 
                 ProductController productController = CreateTestController(shopDataContext);
@@ -316,6 +307,38 @@ namespace AKHWebshop.Test
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "product model's amount cannot contains duplicated sizes"})
+                    {
+                        ContentType = "application/json", StatusCode = 420
+                    };
+
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void CreateNewProductWithoutPriceShouldReturn420()
+        {
+            using (ShopDataContext shopDataContext = CreateDataContext())
+            {
+                Product newProduct = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL},
+                    }
+                };
+
+
+                ProductController productController = CreateTestController(shopDataContext);
+                JsonResult actualResult = productController.CreateProduct(newProduct);
+
+                JsonResult expectedResult =
+                    new JsonResult(new {error = "product's price cannot be null"})
                     {
                         ContentType = "application/json", StatusCode = 420
                     };
@@ -473,6 +496,7 @@ namespace AKHWebshop.Test
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
+                    Price = 5300,
                     ImageName = "crewneck.jpg",
                 };
 
@@ -513,6 +537,7 @@ namespace AKHWebshop.Test
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
                     ImageName = "crewneck.jpg",
+                    Price = 5300,
                     Amount = new List<SizeRecord>
                     {
                         new SizeRecord() {Quantity = 1, Size = Size.XL},
@@ -563,6 +588,7 @@ namespace AKHWebshop.Test
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
                     ImageName = "crewneck.jpg",
+                    Price = 5300,
                     Amount = new List<SizeRecord>
                     {
                         new SizeRecord() {Quantity = 3, Size = Size.XL}
@@ -614,6 +640,7 @@ namespace AKHWebshop.Test
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
                     ImageName = "crewneck.jpg",
+                    Price = 5300,
                     Amount = new List<SizeRecord>
                     {
                         new SizeRecord() {Quantity = 3, Size = Size.XL}
@@ -777,7 +804,8 @@ namespace AKHWebshop.Test
                     DisplayName = "Akh Póló",
                     ImageName = "akh-polo.jpg",
                     Name = "akh-polo",
-                    Status = ProductStatus.Active
+                    Status = ProductStatus.Active,
+                    Price = 2800
                 };
 
                 shopDataContext.Products.Add(testProduct);
@@ -935,6 +963,39 @@ namespace AKHWebshop.Test
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "a product with the provided image name already exists"})
+                    {
+                        ContentType = "application/json", StatusCode = 420
+                    };
+
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void UpdateProductPriceShouldReturn420()
+        {
+            using (ShopDataContext shopDataContext = CreateDataContext())
+            {
+                Product newProduct = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Price = 5300
+                };
+
+                shopDataContext.Add(newProduct);
+                shopDataContext.SaveChanges();
+
+                newProduct.Price = 0;
+
+                ProductController productController = CreateTestController(shopDataContext);
+                JsonResult actualResult = productController.UpdateProduct(newProduct.Id.ToString(), newProduct);
+
+                JsonResult expectedResult =
+                    new JsonResult(new {error = "product's price cannot be null"})
                     {
                         ContentType = "application/json", StatusCode = 420
                     };
