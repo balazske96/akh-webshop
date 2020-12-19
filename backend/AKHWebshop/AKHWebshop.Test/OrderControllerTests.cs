@@ -66,6 +66,7 @@ namespace AKHWebshop.Test
                     FirstName = "Nagy",
                     LastName = "Béla",
                     ZipCode = "4400",
+                    Email = "nagybela@gmail.com",
                     HouseNumber = 4,
                     TotalPrice = 2800,
                     OrderItems = new List<OrderItem>
@@ -693,6 +694,119 @@ namespace AKHWebshop.Test
                 {
                     error = "the selected size not in the stock at the moment"
                 })
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void CreateOrderShouldReturnEmailCannotBeNullError()
+        {
+            using (ShopDataContext dataContext = CreateDataContext())
+            {
+                Product shirt = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Price = 5300,
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                dataContext.Products.Add(shirt);
+                dataContext.SaveChanges();
+
+                Order newOrder = new Order()
+                {
+                    City = "Nyíregyháza",
+                    Country = "Magyarország",
+                    State = "Szabolcs-Szatmár-Bereg-megye",
+                    Comment = "Légyszi csengess",
+                    FirstName = "Nagy",
+                    HouseNumber = 2,
+                    LastName = "Béla",
+                    ZipCode = "4400",
+                    TotalPrice = 2800,
+                    OrderItems = new List<OrderItem>
+                    {
+                        new OrderItem()
+                        {
+                            Amount = 1,
+                            Size = Size.XL,
+                            ProductId = shirt.Id
+                        }
+                    }
+                };
+
+                OrderController controller = CreateTestController(dataContext);
+                JsonResult actualResult = controller.CreateOrder(newOrder);
+                JsonResult expectedResult = new JsonResult(new {error = "email is not provided"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+                Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
+                Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
+                Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
+            }
+        }
+
+
+        [Theory]
+        [InlineData("ads.com")]
+        [InlineData("asd@asd.")]
+        [InlineData("aasd@asd+#.com")]
+        public void CreateOrderShouldReturnEmailInvalidError(string email)
+        {
+            using (ShopDataContext dataContext = CreateDataContext())
+            {
+                Product shirt = new Product()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    ImageName = "crewneck.jpg",
+                    Price = 5300,
+                    Amount = new List<SizeRecord>
+                    {
+                        new SizeRecord() {Quantity = 3, Size = Size.XL}
+                    }
+                };
+
+                dataContext.Products.Add(shirt);
+                dataContext.SaveChanges();
+
+                Order newOrder = new Order()
+                {
+                    City = "Nyíregyháza",
+                    Country = "Magyarország",
+                    State = "Szabolcs-Szatmár-Bereg-megye",
+                    Comment = "Légyszi csengess",
+                    FirstName = "Nagy",
+                    HouseNumber = 2,
+                    Email = email,
+                    LastName = "Béla",
+                    ZipCode = "4400",
+                    TotalPrice = 2800,
+                    OrderItems = new List<OrderItem>
+                    {
+                        new OrderItem()
+                        {
+                            Amount = 1,
+                            Size = Size.XL,
+                            ProductId = shirt.Id
+                        }
+                    }
+                };
+
+                OrderController controller = CreateTestController(dataContext);
+                JsonResult actualResult = controller.CreateOrder(newOrder);
+                JsonResult expectedResult = new JsonResult(new {error = "email is invalid"})
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
