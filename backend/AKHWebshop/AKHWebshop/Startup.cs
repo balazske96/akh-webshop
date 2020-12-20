@@ -121,7 +121,15 @@ namespace AKHWebshop
                     {
                         OnMessageReceived = context =>
                         {
-                            context.Token = context.Request.Cookies["_uc"];
+                            var cookieToken = context.Request.Cookies["_uc"];
+                            if (cookieToken == null)
+                            {
+                                /* if the token is not found in the cookie,
+                                 we stick to the basic method */
+                                return Task.CompletedTask;
+                            }
+
+                            context.Token = cookieToken;
                             return Task.CompletedTask;
                         },
                     };

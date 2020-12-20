@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,14 +10,14 @@ namespace AKHWebshop.Models.Auth
 {
     public class JwtTokenHelper
     {
-        public JwtTokenHelperOptions Options { get; set; }
+        private JwtTokenHelperOptions Options { get; set; }
 
         public JwtTokenHelper(JwtTokenHelperOptions options)
         {
             Options = options;
         }
 
-        public string GenerateToken(Claim[] claims)
+        public string GenerateToken(IEnumerable<Claim> claims)
         {
             var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Options.SecretKey));
             var tokenHandler = new JwtSecurityTokenHandler();

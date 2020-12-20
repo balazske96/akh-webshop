@@ -56,6 +56,13 @@ namespace AKHWebshop.Models.Shop.Data
                 model.Property(order => order.PublicSpaceType).HasDefaultValue(PublicSpaceType.Utca);
             });
 
+            // Set the BillingInfo entity
+            modelBuilder.Entity<BillingInfo>(model =>
+            {
+                model.ToTable("billing_info");
+                model.HasKey(b => b.Id);
+            });
+
             // Set the OrderItem entity
             modelBuilder.Entity<OrderItem>(model =>
             {
@@ -66,9 +73,21 @@ namespace AKHWebshop.Models.Shop.Data
             modelBuilder.Entity<AppUser>(model =>
             {
                 model.ToTable("user");
+                model.Property(u => u.Id).HasColumnName("id");
                 model.Property(u => u.PasswordHash).HasColumnName("password_hash");
                 model.Property(u => u.Email).HasColumnName("email");
+                model.Property(u => u.NormalizedEmail).HasColumnName("normalized_email");
                 model.Property(u => u.UserName).HasColumnName("username");
+                model.Property(u => u.NormalizedUserName).HasColumnName("normalized_username");
+                model.Property(u => u.EmailConfirmed).HasColumnName("email_confirmed");
+                model.Property(u => u.LockoutEnabled).HasColumnName("lockout_enabled");
+                model.Property(u => u.LockoutEnd).HasColumnName("lockout_end");
+                model.Property(u => u.PhoneNumber).HasColumnName("phone_number");
+                model.Property(u => u.PhoneNumberConfirmed).HasColumnName("phone_number_confirmed");
+                model.Property(u => u.SecurityStamp).HasColumnName("security_stamp");
+                model.Property(u => u.ConcurrencyStamp).HasColumnName("concurrency_stamp");
+                model.Property(u => u.AccessFailedCount).HasColumnName("access_failed_count");
+                model.Property(u => u.TwoFactorEnabled).HasColumnName("two_factor_enabled");
             });
 
             // Set IdentityRole entity

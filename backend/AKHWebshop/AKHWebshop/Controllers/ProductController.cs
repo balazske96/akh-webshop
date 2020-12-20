@@ -26,7 +26,6 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public JsonResult GetAllProduct([FromQuery] int? skip = null, [FromQuery] int? limit = null)
         {
             if (limit.HasValue)
@@ -175,7 +174,7 @@ namespace AKHWebshop.Controllers
                 {
                     ContentType = "application/json", StatusCode = 420
                 };
-            
+
             bool productPriceIsNull = product.Price == 0;
             if (productPriceIsNull)
             {
@@ -235,6 +234,7 @@ namespace AKHWebshop.Controllers
 
             _dataContext.Products.Remove(subject);
             _dataContext.SaveChanges();
+
             return new JsonResult(new {message = "product deleted"})
             {
                 ContentType = "application/json", StatusCode = 200

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Net.Mail;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace AKHWebshop.Models.Mail
 {
@@ -11,27 +12,30 @@ namespace AKHWebshop.Models.Mail
         private SmtpClient Client { get; set; }
         private string BandAddress { get; set; }
 
-        public AkhMailClient(SmtpClient emailClient, string bandAddress = "noreply@shop.hu")
+        private ILogger<AkhMailClient> Logger { get; set; }
+
+        public AkhMailClient(SmtpClient emailClient,
+            ILogger<AkhMailClient> logger, string bandAddress = "noreply@shop.hu")
         {
             Client = emailClient;
             BandAddress = bandAddress;
+            Logger = logger;
         }
 
         private static bool mailSent = false;
 
-        private static void SendCompletedCallback(object sender, AsyncCompletedEventArgs e)
+        private void SendCompletedCallback(object sender, AsyncCompletedEventArgs e)
         {
             // Get the unique identifier for this asynchronous operation.
             String token = e.UserState.ToString();
 
-            if (e.Cancelled)
-            {
-                Console.WriteLine("[{0}] Send canceled.", token);
-            }
-
             if (e.Error != null)
             {
-                Console.WriteLine("[{0}] {1}", token, e.Error.ToString());
+                Logger.Log(LogLevel.Warning, "[{0}] {1}", token, e.Error.ToString());
+            }
+            else
+            {
+                Logger.Log(LogLevel.Information, "email sent: " + token);
             }
 
             mailSent = true;

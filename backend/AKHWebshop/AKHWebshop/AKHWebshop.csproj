@@ -22,4 +22,15 @@
     <ItemGroup>
       <Folder Include="Migrations" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Models\Shop\Data\DeliveryAddress.cs" />
+      <Compile Remove="Models\Shop\Data\Customer.cs" />
+      <Compile Remove="Models\Shop\Data\BillingIdentity.cs" />
+      <Compile Remove="Models\Shop\Data\BillingAddress.cs" />
+      <Compile Remove="Models\Shop\Data\Address.cs" />
+      <Compile Remove="Models\Shop\Data\OrderIdentity.cs" />
+      <Compile Remove="Models\Shop\Data\OrderAddress.cs" />
+      <Compile Remove="Models\Shop\Data\Identity.cs" />
+    </ItemGroup>
 </Project>

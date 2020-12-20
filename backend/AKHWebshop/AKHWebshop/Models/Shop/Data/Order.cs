@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using System.Text.Json;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace AKHWebshop.Models.Shop.Data
 {
     [Table("order")]
-    public class Order : DatedEntity
+    public class Order : DatedEntity, IIdentifiable, IAddressable
     {
         [Required]
         [JsonPropertyName("id")]
@@ -33,7 +36,7 @@ namespace AKHWebshop.Models.Shop.Data
         [Required]
         [JsonPropertyName("public_space_type")]
         [Column("public_space_type", TypeName = "varchar(20)")]
-        public PublicSpaceType PublicSpaceType { get; set; } = PublicSpaceType.Utca;
+        public PublicSpaceType? PublicSpaceType { get; set; }
 
         [Required]
         [JsonPropertyName("public_space_name")]
@@ -94,11 +97,40 @@ namespace AKHWebshop.Models.Shop.Data
             ErrorMessage = "incorrect email format")]
         public string Email { get; set; }
 
+        [Required]
+        [JsonPropertyName("billing_info")]
+        [ForeignKey("billing_info_id")]
+        public BillingInfo BillingInfo { get; set; }
+
+        [Required]
+        [JsonPropertyName("same_billing_info")]
+        [Column("same_billing_info", TypeName = "bool")]
+        public bool BillingInfoSameAsOrderInfo { get; set; }
+
         [JsonPropertyName("order_items")] public List<OrderItem> OrderItems { get; set; }
 
         public override string ToString()
         {
-            return $"order_id:{Id.ToString()},first_name:{FirstName},last_name:{LastName},zip_code:{ZipCode}";
+            return JsonSerializer.Serialize(this);
+        }
+
+        public bool billingInfoIsEmpty()
+        {
+            if (BillingInfo == null)
+                return true;
+            return (
+                BillingInfo.City == null &&
+                BillingInfo.Country == null &&
+                BillingInfo.Country == null &&
+                BillingInfo.PublicSpaceType == null &&
+                BillingInfo.PublicSpaceName == null &&
+                BillingInfo.FirstName == null &&
+                BillingInfo.LastName == null &&
+                BillingInfo.State == null &&
+                BillingInfo.HouseNumber == 0 &&
+                BillingInfo.Floor == null &&
+                BillingInfo.Door == null
+            );
         }
     }
 }

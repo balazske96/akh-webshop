@@ -1,9 +1,12 @@
 #nullable enable
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AKHWebshop.Models.Mail;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace AKHWebshop.Controllers
@@ -11,7 +14,6 @@ namespace AKHWebshop.Controllers
     [ApiController]
     [Route("[controller]")]
     public class OrderController : ControllerBase
-
     {
         private ILogger<OrderController> _logger;
         private IAkhMailClient _mailClient;
@@ -24,10 +26,117 @@ namespace AKHWebshop.Controllers
             _dataContext = dataContext;
         }
 
+        [HttpGet]
+        public JsonResult GetAllOrder([FromQuery] int? skip = null, [FromQuery] int? limit = null)
+        {
+            if (limit.HasValue)
+            {
+                List<Order> products = _dataContext.Orders.Skip(skip ?? 0)
+                    .Take(limit.Value)
+                    .ToList();
+                return new JsonResult(products)
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+            }
+
+            JsonResult result =
+                new JsonResult(_dataContext.Orders.ToList())
+                {
+                    ContentType = "application/json", StatusCode = 200
+                };
+            return result;
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public JsonResult GetOrder(string id)
+        {
+            Order? result = _dataContext.Orders.Find(Guid.Parse(id));
+            if (result == null)
+            {
+                return new JsonResult(new {error = "order with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+            return new JsonResult(result)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+        }
+
         [HttpPost]
         public JsonResult CreateOrder([FromBody] Order order)
         {
-            bool countryIsNull = order.Country == null;
+            JsonResult? validatedResult = ValidateOrder(order);
+            if (validatedResult != null)
+            {
+                return validatedResult;
+            }
+
+            _dataContext.Add(order);
+            _dataContext.SaveChanges();
+
+            _mailClient.SendNewOrderMail(order);
+
+            return new JsonResult(order) {ContentType = "application/json", StatusCode = 200};
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public JsonResult UpdateOrder(string id, [FromBody] Order order)
+        {
+            Order subjectOrder = _dataContext.Orders.Find(Guid.Parse(id));
+            if (subjectOrder == null)
+            {
+                return new JsonResult(new {error = "order with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+            JsonResult? validatedResult = ValidateOrder(order);
+            if (validatedResult != null)
+            {
+                return validatedResult;
+            }
+
+            _dataContext.Update(order);
+            _dataContext.SaveChanges();
+
+            return new JsonResult(order)
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public JsonResult DeletedOrder(string id)
+        {
+            Order subjectOrder = _dataContext.Orders.Find(Guid.Parse(id));
+            if (subjectOrder == null)
+            {
+                return new JsonResult(new {error = "order with the specified id does not exist"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+            _dataContext.Orders.Remove(subjectOrder);
+            _dataContext.SaveChanges();
+
+            return new JsonResult(new {message = "order deleted"})
+            {
+                ContentType = "application/json", StatusCode = 200
+            };
+        }
+
+        private JsonResult? ValidateOrder(Order order)
+        {
+            bool countryIsNull = string.IsNullOrEmpty(order.Country);
             if (countryIsNull)
             {
                 return new JsonResult(new {error = "country field cannot be null"})
@@ -36,7 +145,7 @@ namespace AKHWebshop.Controllers
                 };
             }
 
-            bool firstNameIsNull = order.FirstName == null;
+            bool firstNameIsNull = string.IsNullOrEmpty(order.FirstName);
             if (firstNameIsNull)
             {
                 return new JsonResult(new {error = "first name field cannot be null"})
@@ -45,7 +154,7 @@ namespace AKHWebshop.Controllers
                 };
             }
 
-            bool lastNameIsNull = order.LastName == null;
+            bool lastNameIsNull = string.IsNullOrEmpty(order.LastName);
             if (lastNameIsNull)
             {
                 return new JsonResult(new {error = "last name field cannot be null"})
@@ -82,7 +191,7 @@ namespace AKHWebshop.Controllers
                 };
             }
 
-            bool cityIsNull = order.City == null;
+            bool cityIsNull = string.IsNullOrEmpty(order.City);
             if (cityIsNull)
             {
                 return new JsonResult(new
@@ -112,27 +221,6 @@ namespace AKHWebshop.Controllers
                 };
             }
 
-            bool orderAmountIsInvalid = order.OrderItems.Any(
-                orderItem =>
-                {
-                    SizeRecord? selectedSizeRecord = _dataContext.SizeRecords.Find(orderItem.ProductId, orderItem.Size);
-                    if (selectedSizeRecord == null)
-                        return true;
-                    return (orderItem.Amount > selectedSizeRecord.Quantity && selectedSizeRecord.Quantity > 0);
-                }
-            );
-            if (orderAmountIsInvalid)
-            {
-                return new JsonResult(new
-                {
-                    error =
-                        "you are trying to make an order in which the product number is more than the quantity in stock"
-                })
-                {
-                    ContentType = "application/json", StatusCode = 420
-                };
-            }
-
             bool sizeNotInStock = order.OrderItems.Any(
                 orderItem =>
                 {
@@ -156,6 +244,28 @@ namespace AKHWebshop.Controllers
                 };
             }
 
+            bool orderAmountIsInvalid = order.OrderItems.Any(
+                orderItem =>
+                {
+                    SizeRecord? selectedSizeRecord = _dataContext.SizeRecords.Find(orderItem.ProductId, orderItem.Size);
+                    if (selectedSizeRecord == null)
+                        return true;
+                    return (orderItem.Amount > selectedSizeRecord.Quantity && selectedSizeRecord.Quantity > 0);
+                }
+            );
+            if (orderAmountIsInvalid)
+            {
+                return new JsonResult(new
+                {
+                    error =
+                        "you are trying to make an order in which the product number is more than the quantity in stock"
+                })
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+
             bool emailIsNull = order.Email == null;
             if (emailIsNull)
             {
@@ -175,7 +285,7 @@ namespace AKHWebshop.Controllers
                 };
             }
 
-            bool publicSpaceIsNull = order.PublicSpaceName == null;
+            bool publicSpaceIsNull = string.IsNullOrEmpty(order.PublicSpaceName);
             if (publicSpaceIsNull)
             {
                 return new JsonResult(new {error = "public space name field cannot be null"})
@@ -184,12 +294,33 @@ namespace AKHWebshop.Controllers
                 };
             }
 
-            _dataContext.Add(order);
-            _dataContext.SaveChanges();
+            bool billingInfoNotEmpty = !order.billingInfoIsEmpty();
+            bool billingInfoShouldBeEmpty = order.BillingInfoSameAsOrderInfo;
+            if (billingInfoNotEmpty && billingInfoShouldBeEmpty)
+            {
+                return new JsonResult(new {error = "billing infos should be empty if same_billing_info is true"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
 
-            _mailClient.SendNewOrderMail(order);
-            
-            return new JsonResult(order) {ContentType = "application/json", StatusCode = 200};
+            bool orderContainsInactiveProduct = order.OrderItems.Any(orderItem =>
+                {
+                    Product product = _dataContext.Products.Find(orderItem.ProductId);
+                    return product.Status == ProductStatus.Hidden ||
+                           product.Status == ProductStatus.ComingSoon ||
+                           product.Status == ProductStatus.SoldOut;
+                }
+            );
+            if (orderContainsInactiveProduct)
+            {
+                return new JsonResult(new {error = "order cannot contains non activated products"})
+                {
+                    ContentType = "application/json", StatusCode = 420
+                };
+            }
+
+            return null;
         }
     }
 }

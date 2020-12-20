@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace AKHWebshop.Models.Shop.Data
 {
-    public class DatedEntity
+    public abstract class DatedEntity
     {
         [JsonPropertyName("created_at")]
         [Column("created_at")]

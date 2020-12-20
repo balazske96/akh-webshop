@@ -29,5 +29,9 @@ namespace AKHWebshop.Models.Shop.Data
         [JsonPropertyName("amount")]
         [Column("amount")]
         public ushort Amount { get; set; }
+
+        [NotMapped]
+        [JsonPropertyName("product")]
+        public Product Product { get; set; }
     }
 }
