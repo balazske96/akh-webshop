@@ -88,17 +88,35 @@ namespace AKHWebshop.Models.Shop.Data
                 model.Property(u => u.ConcurrencyStamp).HasColumnName("concurrency_stamp");
                 model.Property(u => u.AccessFailedCount).HasColumnName("access_failed_count");
                 model.Property(u => u.TwoFactorEnabled).HasColumnName("two_factor_enabled");
+                model
+                    .HasMany(u => u.Roles)
+                    .WithOne(r => r.User)
+                    .HasForeignKey(ur => ur.UserId);
+            });
+    
+            // We can't rename AppRole's table so we have to rename the base class' table
+            modelBuilder.Entity<IdentityRole>(
+                model => { model.ToTable("role"); });
+
+            // Set AppRole entity
+            modelBuilder.Entity<AppRole>(model =>
+            {
+                model.HasData(new List<AppRole>()
+                {
+                    new AppRole() {Name = "admin", NormalizedName = "Admin"},
+                    new AppRole() {Name = "user", NormalizedName = "User"}
+                });
+                model
+                    .HasMany(r => r.Users)
+                    .WithOne(u => u.Role)
+                    .HasForeignKey(ur => ur.RoleId);
             });
 
-            // Set IdentityRole entity
-            modelBuilder.Entity<IdentityRole>(model =>
+            // Set UserRole table to bind Roles and Users
+            modelBuilder.Entity<UserRole>(model =>
             {
-                model.ToTable("role");
-                model.HasData(new List<IdentityRole>()
-                {
-                    new IdentityRole() {Name = "admin", NormalizedName = "Admin"},
-                    new IdentityRole() {Name = "user", NormalizedName = "User"}
-                });
+                model.ToTable("user_role");
+                model.HasKey(ur => new {ur.RoleId, ur.UserId});
             });
 
             base.OnModelCreating(modelBuilder);

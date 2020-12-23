@@ -43,10 +43,10 @@ namespace AKHWebshop.Controllers
             string token = _tokenHelper.GenerateToken(
                 new[]
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Name, user!.UserName),
                 });
 
-            this.HttpContext.Response.Cookies.Append("_uc", token);
+            HttpContext.Response.Cookies.Append("_uc", token);
 
             return new JsonResult("ok")
             {
