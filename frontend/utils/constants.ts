@@ -1,0 +1,1 @@
+export const mobileMenuWindowBoundaryInPixel = 500;

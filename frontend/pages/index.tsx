@@ -1,41 +1,35 @@
 import React from "react";
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.scss';
 import {
     GetStaticProps,
     GetStaticPaths,
     GetServerSideProps,
     NextPage,
     NextPageContext,
-    GetServerSidePropsContext
+    GetServerSidePropsContext, NextComponentType
 } from 'next'
 import Link from 'next/link';
 import {useShop} from "../utils/shop";
+import Menu from '../components/Menu';
 
 interface Props {
+
 }
 
 const Home: NextPage<Props> = () => {
 
-    const {test, setTest} = useShop();
-
     return (
         <div className={styles.container}>
-            <Link href="/another-page">
-                Another page
-            </Link>
-            <input onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                console.log(event);
-                setTest(event.target.value);
-            }}/>
-            <div>{test}</div>
+            <Menu/>
+            <section className={styles.news}></section>
         </div>
     )
 }
 
+
 export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
     return {props: {}}
-
 }
 
 export default Home;
