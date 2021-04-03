@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using AKHWebshop.Controllers;
+using AKHWebshop.Models;
+using AKHWebshop.Models.Http.Request;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +24,7 @@ namespace AKHWebshop.Test
         private ProductController CreateTestController(ShopDataContext shopDataContext)
         {
             ILogger<Product> logger = new Logger<Product>(new LoggerFactory());
-            return new ProductController(logger, shopDataContext);
+            return new ProductController(logger, shopDataContext, new RequestMapper());
         }
 
         [Fact]
@@ -91,7 +93,7 @@ namespace AKHWebshop.Test
                     ContentType = "application/json", StatusCode = 200
                 };
 
-                JsonResult actualResult = productController.GetAllProduct();
+                JsonResult actualResult = (JsonResult) productController.GetAllProduct();
                 Assert.Equal(expectedResult.ToString(), actualResult.ToString());
                 Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
                 Assert.Equal(expectedResult.StatusCode, actualResult.StatusCode);
@@ -127,7 +129,7 @@ namespace AKHWebshop.Test
                 expectedResult.ContentType = "application/json";
                 expectedResult.StatusCode = 200;
                 string paramGuid = guid1.ToString();
-                JsonResult actualResult = productController.GetProductById(paramGuid);
+                JsonResult actualResult = (JsonResult) productController.GetProductById(paramGuid);
 
                 Assert.Equal(expectedResult.ToString(), actualResult.ToString());
                 Assert.Equal(expectedResult.ContentType, actualResult.ContentType);
@@ -196,10 +198,10 @@ namespace AKHWebshop.Test
 
                 ProductController productController = CreateTestController(shopDataContext);
 
-                JsonResult actualJsonResult1 = productController.GetAllProduct(2, 2);
-                JsonResult actualJsonResult2 = productController.GetAllProduct(null, 3);
-                JsonResult actualJsonResult3 = productController.GetAllProduct(3, 1);
-                JsonResult actualJsonResult4 = productController.GetAllProduct(1000, 2);
+                JsonResult actualJsonResult1 = (JsonResult) productController.GetAllProduct(2, 2);
+                JsonResult actualJsonResult2 = (JsonResult) productController.GetAllProduct(null, 3);
+                JsonResult actualJsonResult3 = (JsonResult) productController.GetAllProduct(3, 1);
+                JsonResult actualJsonResult4 = (JsonResult) productController.GetAllProduct(1000, 2);
 
                 Assert.Equal(2, ((List<Product>) actualJsonResult1.Value).Count);
                 Assert.Equal(3, ((List<Product>) actualJsonResult2.Value).Count);
@@ -214,7 +216,8 @@ namespace AKHWebshop.Test
             using (ShopDataContext shopDataContext = CreateDataContext())
             {
                 ProductController controller = CreateTestController(shopDataContext);
-                JsonResult actualResult = controller.GetProductById("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+                JsonResult actualResult =
+                    (JsonResult) controller.GetProductById("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
                 JsonResult expectedResult = new JsonResult(new {error = "product not found"})
                     {ContentType = "application/json", StatusCode = 420};
                 Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
@@ -228,7 +231,7 @@ namespace AKHWebshop.Test
         {
             using (ShopDataContext shopDataContext = CreateDataContext())
             {
-                Product newProduct = new Product()
+                CreateProductRequest newProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
@@ -242,7 +245,7 @@ namespace AKHWebshop.Test
 
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(newProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(newProduct);
 
 
                 JsonResult expectedResult = new JsonResult(newProduct)
@@ -261,7 +264,7 @@ namespace AKHWebshop.Test
         {
             using (ShopDataContext shopDataContext = CreateDataContext())
             {
-                Product newProduct = new Product()
+                CreateProductRequest newProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
@@ -270,7 +273,7 @@ namespace AKHWebshop.Test
                 };
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(newProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(newProduct);
 
 
                 JsonResult expectedResult = new JsonResult(newProduct)
@@ -289,7 +292,7 @@ namespace AKHWebshop.Test
         {
             using (ShopDataContext shopDataContext = CreateDataContext())
             {
-                Product newProduct = new Product()
+                CreateProductRequest newProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
@@ -303,7 +306,7 @@ namespace AKHWebshop.Test
 
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(newProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(newProduct);
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "product model's amount cannot contains duplicated sizes"})
@@ -322,7 +325,7 @@ namespace AKHWebshop.Test
         {
             using (ShopDataContext shopDataContext = CreateDataContext())
             {
-                Product newProduct = new Product()
+                CreateProductRequest newProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
@@ -335,7 +338,7 @@ namespace AKHWebshop.Test
 
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(newProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(newProduct);
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "product's price cannot be null"})
@@ -369,7 +372,7 @@ namespace AKHWebshop.Test
                 shopDataContext.Add(newProduct);
                 shopDataContext.SaveChanges();
 
-                Product anotherProduct = new Product()
+                CreateProductRequest anotherProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi",
                     DisplayName = "Bestest pulóver",
@@ -381,7 +384,7 @@ namespace AKHWebshop.Test
                 };
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(anotherProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(anotherProduct);
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "product with the specified name already exists"})
@@ -415,7 +418,7 @@ namespace AKHWebshop.Test
                 shopDataContext.Add(newProduct);
                 shopDataContext.SaveChanges();
 
-                Product anotherProduct = new Product()
+                CreateProductRequest anotherProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi-2",
                     DisplayName = "AKH Crewneck Pulóver",
@@ -427,7 +430,7 @@ namespace AKHWebshop.Test
                 };
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(anotherProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(anotherProduct);
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "product with the specified display name already exists"})
@@ -461,7 +464,7 @@ namespace AKHWebshop.Test
                 shopDataContext.Add(newProduct);
                 shopDataContext.SaveChanges();
 
-                Product anotherProduct = new Product()
+                CreateProductRequest anotherProduct = new CreateProductRequest()
                 {
                     Name = "pulcsi-2",
                     DisplayName = "AKH Crewneck Pulóverke",
@@ -473,7 +476,7 @@ namespace AKHWebshop.Test
                 };
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(anotherProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(anotherProduct);
 
                 JsonResult expectedResult =
                     new JsonResult(new {error = "product with the specified image name already exists"})
@@ -492,7 +495,15 @@ namespace AKHWebshop.Test
         {
             using (ShopDataContext shopDataContext = CreateDataContext())
             {
-                Product newProduct = new Product()
+                CreateProductRequest newProduct = new CreateProductRequest()
+                {
+                    Name = "pulcsi",
+                    DisplayName = "AKH Crewneck Pulóver",
+                    Price = 5300,
+                    ImageName = "crewneck.jpg",
+                };
+                
+                UpdateProductRequest updateProduct = new UpdateProductRequest()
                 {
                     Name = "pulcsi",
                     DisplayName = "AKH Crewneck Pulóver",
@@ -502,7 +513,7 @@ namespace AKHWebshop.Test
 
 
                 ProductController productController = CreateTestController(shopDataContext);
-                JsonResult actualResult = productController.CreateProduct(newProduct);
+                JsonResult actualResult = (JsonResult) productController.CreateProduct(newProduct);
 
 
                 JsonResult expectedResult = new JsonResult(newProduct)
@@ -519,7 +530,8 @@ namespace AKHWebshop.Test
 
                 JsonResult newExpectedResult = new JsonResult(newProduct)
                     {ContentType = "application/json", StatusCode = 200};
-                JsonResult newActualResult = productController.UpdateProduct(newProduct.Id.ToString(), newProduct);
+                JsonResult newActualResult =
+                    (JsonResult) productController.UpdateProduct(updateProduct.Id.ToString(), updateProduct);
 
                 Assert.Equal(expectedResult.Value.ToString(), actualResult.Value.ToString());
                 Assert.Equal(expectedResult.ContentType, actualResult.ContentType);

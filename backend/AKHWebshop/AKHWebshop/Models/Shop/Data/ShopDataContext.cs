@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AKHWebshop.Models.Auth;
+using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
 
 namespace AKHWebshop.Models.Shop.Data
 {
@@ -93,7 +92,7 @@ namespace AKHWebshop.Models.Shop.Data
                     .WithOne(r => r.User)
                     .HasForeignKey(ur => ur.UserId);
             });
-    
+
             // We can't rename AppRole's table so we have to rename the base class' table
             modelBuilder.Entity<IdentityRole>(
                 model => { model.ToTable("role"); });

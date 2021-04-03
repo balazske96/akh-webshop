@@ -6,9 +6,11 @@ using System.Net.Mail;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AKHWebshop.Models;
 using AKHWebshop.Models.Auth;
 using AKHWebshop.Models.Mail;
 using AKHWebshop.Models.Shop.Data;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,6 +27,7 @@ using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Persistence;
 
 
 namespace AKHWebshop
@@ -73,6 +76,8 @@ namespace AKHWebshop
                 };
                 return new JwtTokenHelper(jwtOptions);
             });
+
+            services.AddScoped<IRequestMapper, RequestMapper>();
 
             services.AddControllers()
                 .AddJsonOptions(
@@ -141,6 +146,11 @@ namespace AKHWebshop
             {
                 options.AddPolicy("Allow credentials", builder => { builder.AllowCredentials(); });
             });
+
+            services.AddMvc()
+                .AddFluentValidation(
+                    fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>()
+                );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

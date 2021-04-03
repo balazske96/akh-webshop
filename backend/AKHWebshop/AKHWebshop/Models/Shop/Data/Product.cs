@@ -8,11 +8,12 @@ using System.Runtime.Intrinsics.X86;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
+using Persistence;
 
 namespace AKHWebshop.Models.Shop.Data
 {
     [Table("product")]
-    public class Product
+    public class Product : IHasId
     {
         [Required]
         [JsonPropertyName("id")]
@@ -45,13 +46,5 @@ namespace AKHWebshop.Models.Shop.Data
         [Column("price")]
         public uint Price { get; set; }
 
-        public bool DoesAmountContainSizeDuplication()
-        {
-            if (Amount == null)
-                return false;
-            HashSet<Size> sizes = new HashSet<Size>();
-            List<SizeRecord> duplicates = Amount.Where(sizeRec => !sizes.Add(sizeRec.Size)).ToList();
-            return duplicates.Count != 0;
-        }
     }
 }
