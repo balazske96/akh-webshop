@@ -4,67 +4,80 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using AKHWebshop.Models.Shop.Data;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AKHWebshop.Models.Http.Request
 {
     public class CreateOrderRequest
     {
+        [FromBody]
         [Required]
         [JsonPropertyName("country")]
         [MaxLength(256)]
         public string Country { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("zip_code")]
         [RegularExpression(@"^\d{4}$", ErrorMessage = "incorrect zip code format")]
         [MaxLength(4)]
         public string ZipCode { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("city")]
         [MaxLength(256)]
         public string City { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("public_space_type")]
         [MaxLength(20)]
         public PublicSpaceType? PublicSpaceType { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("public_space_name")]
         [Column("public_space_name", TypeName = "varchar(256)")]
         public string PublicSpaceName { get; set; }
 
+        [FromBody]
         [JsonPropertyName("state")]
         [MaxLength(256)]
         public string State { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("house_number")]
         public ushort HouseNumber { get; set; }
 
-        [JsonPropertyName("floor")] public byte? Floor { get; set; }
+        [FromBody] [JsonPropertyName("floor")] public byte? Floor { get; set; }
 
-        [JsonPropertyName("door")] public ushort? Door { get; set; }
+        [FromBody] [JsonPropertyName("door")] public ushort? Door { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("total_price")]
         public uint TotalPrice { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("first_name")]
         [MaxLength(256)]
         public string FirstName { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("last_name")]
         [MaxLength(256)]
         public string LastName { get; set; }
 
+        [FromBody]
         [JsonPropertyName("comment")]
         [MaxLength(256)]
         public string Comment { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("email")]
         [MaxLength(256)]
@@ -73,14 +86,17 @@ namespace AKHWebshop.Models.Http.Request
             ErrorMessage = "incorrect email format")]
         public string Email { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("billing_info")]
         public BillingInfo BillingInfo { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("same_billing_info")]
         public bool BillingInfoSameAsOrderInfo { get; set; }
 
+        [FromBody]
         [Required]
         [JsonPropertyName("order_items")]
         public List<OrderItem> OrderItems { get; set; }

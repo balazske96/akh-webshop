@@ -44,14 +44,11 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllOrder([FromQuery] int? skip = null, [FromQuery] int? limit = null)
+        public async Task<ActionResult> GetAllOrder(GetAllOrderRequest request)
         {
-            int actualSkip = skip ?? 0;
-            int actualLimit = limit ?? 10;
-
             List<Order> products = await _dataContext.Orders
-                .Skip(actualSkip)
-                .Take(actualLimit)
+                .Skip(request.Skip)
+                .Take(request.Limit)
                 .ToListAsync();
 
             return _jsonResponseFactory.CreateResponse(200, products);
@@ -82,18 +79,15 @@ namespace AKHWebshop.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<ActionResult> UpdateOrder(string id, [FromBody] UpdateOrderRequest request)
+        public async Task<ActionResult> UpdateOrder(UpdateOrderRequest request)
         {
-            Order subjectOrder = await _dataContext.Orders.FindAsync(Guid.Parse(id));
-            if (subjectOrder == null)
-                return _jsonResponseFactory.CreateResponse(420,
-                    "order with the specified id does not exist");
-
+            Order subjectOrder = await _dataContext.Orders.FindAsync(Guid.Parse(request.Id));
             Order mappedOrder = _requestMapper.UpdateOrderRequestToOrder(request);
+
             _modelMerger.CopyValues(subjectOrder, mappedOrder);
             _dataContext.Update(mappedOrder);
-            await _dataContext.SaveChangesAsync();
 
+            await _dataContext.SaveChangesAsync();
             return _jsonResponseFactory.CreateResponse(200, mappedOrder);
         }
 

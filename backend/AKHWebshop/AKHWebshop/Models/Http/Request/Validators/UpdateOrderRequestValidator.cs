@@ -9,6 +9,13 @@ namespace AKHWebshop.Models.Http.Request.Validators
     {
         public UpdateOrderRequestValidator(ShopDataContext dataContext)
         {
+            RuleFor(request => request.Id).Custom((id, context) =>
+            {
+                Order subjectOrder = dataContext.Orders.Find(Guid.Parse(id));
+                if (subjectOrder == null)
+                    context.AddFailure("Id", "order with the specified id does not exist");
+            });
+
             // HouseNumber validation 
             RuleFor(request => request.HouseNumber)
                 .GreaterThan((ushort) 0)

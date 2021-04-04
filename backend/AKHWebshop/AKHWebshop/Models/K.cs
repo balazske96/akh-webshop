@@ -13,5 +13,6 @@ namespace AKHWebshop.Models
         public static string passwordContainsNumberRegex = @"\d+";
         public static string passwordContainsLetterRegex = @"[a-zA-Z]+";
         public static string userAuthCookieName = "_uc";
+        public static string guidRegex = @"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?";
     }
 }
