@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -8,26 +6,22 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AKHWebshop.Models;
 using AKHWebshop.Models.Auth;
+using AKHWebshop.Models.Http.Request.DTO;
+using AKHWebshop.Models.Http.Response;
 using AKHWebshop.Models.Mail;
 using AKHWebshop.Models.Shop.Data;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
-using Microsoft.Extensions.Logging.Debug;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Persistence;
 
 
 namespace AKHWebshop
@@ -44,28 +38,36 @@ namespace AKHWebshop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IAkhMailClient>(_ =>
+            // Register simple services
+            services.AddScoped<IAkhMailClient, AkhMailClient>();
+            services.AddScoped<IRequestMapper, RequestMapper>();
+            services.AddScoped<IModelMerger, ModelMerger>();
+            services.AddScoped<IActionResultFactory<JsonResult>, JsonResultFactory>();
+
+            // Register fluent validation
+            services
+                .AddMvc()
+                .AddFluentValidation(
+                    fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>()
+                );
+
+            // Register loggin
+            services.AddLogging();
+
+            // Register database entrypoint
+            services.AddDbContextPool<ShopDataContext>(options =>
             {
-                string bandAddress = Configuration["Mail:BandMail"];
-                string username = Configuration["Mail:Credentials:User"];
-                string password = Configuration["Mail:Credentials:Password"];
-                string host = Configuration["Mail:Host"];
-                int port = Int32.Parse(Configuration["Mail:Port"]);
-                bool ssl = Boolean.Parse(Configuration["Mail:Ssl"]);
-
-                SmtpClient emailClient = new SmtpClient();
-                emailClient.Host = host;
-                emailClient.Port = port;
-                emailClient.Credentials = new NetworkCredential(username, password);
-                emailClient.EnableSsl = ssl;
-                emailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                emailClient.UseDefaultCredentials = false;
-
-                ILogger<AkhMailClient> logger = new Logger<AkhMailClient>(new LoggerFactory());
-
-                return new AkhMailClient(emailClient, logger, bandAddress);
+                string connectionString = Configuration["Database:ConnectionString"];
+                options.UseMySql(connectionString);
             });
 
+            // Register identity framework
+            services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<ShopDataContext>()
+                .AddDefaultTokenProviders();
+
+
+            // Auth and JWT Configuration
             services.AddScoped(options =>
             {
                 JwtTokenHelperOptions jwtOptions = new JwtTokenHelperOptions()
@@ -77,29 +79,11 @@ namespace AKHWebshop
                 return new JwtTokenHelper(jwtOptions);
             });
 
-            services.AddScoped<IRequestMapper, RequestMapper>();
-
             services.AddControllers()
                 .AddJsonOptions(
                     options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); }
                 );
 
-            services.AddLogging();
-            services.AddDbContextPool<ShopDataContext>(options =>
-            {
-                string connectionString = Configuration["Database:ConnectionString"];
-                options.UseMySql(connectionString);
-            });
-
-            services.AddIdentity<AppUser, IdentityRole>(options =>
-                {
-                    options.Password.RequireDigit = true;
-                    options.Password.RequiredLength = 8;
-                    options.Password.RequireUppercase = false;
-                    options.Password.RequireNonAlphanumeric = false;
-                })
-                .AddEntityFrameworkStores<ShopDataContext>()
-                .AddDefaultTokenProviders();
 
             services.AddAuthentication(options =>
             {
@@ -121,12 +105,12 @@ namespace AKHWebshop
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                     };
 
-                    // We specify where to look for the token 
+                    /* We specify where to look for the token */
                     options.Events = new JwtBearerEvents()
                     {
                         OnMessageReceived = context =>
                         {
-                            var cookieToken = context.Request.Cookies["_uc"];
+                            var cookieToken = context.Request.Cookies[K.userAuthCookieName];
                             if (cookieToken == null)
                             {
                                 /* if the token is not found in the cookie,
@@ -141,16 +125,14 @@ namespace AKHWebshop
                 }
             );
 
+            // Swagger configuration 
             services.AddSwaggerGen();
+
+            // CORS configration
             services.AddCors(options =>
             {
                 options.AddPolicy("Allow credentials", builder => { builder.AllowCredentials(); });
             });
-
-            services.AddMvc()
-                .AddFluentValidation(
-                    fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>()
-                );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

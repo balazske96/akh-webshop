@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AKHWebshop.Models;
 using AKHWebshop.Models.Http.Request;
+using AKHWebshop.Models.Http.Request.DTO;
 using AKHWebshop.Models.Http.Response;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -19,19 +20,20 @@ namespace AKHWebshop.Controllers
     {
         private readonly ILogger<Product> _logger;
         private IRequestMapper _requestMapper;
-        private IActionResultFactory _jsonResponseFactory;
+        private IActionResultFactory<JsonResult> _jsonResponseFactory;
         private ShopDataContext _shopDataContext;
 
         public ProductController(
             ILogger<Product> logger,
             ShopDataContext dataContext,
-            IRequestMapper requestMapper
+            IRequestMapper requestMapper,
+            IActionResultFactory<JsonResult> jsonResponseFactory
         )
         {
             _logger = logger;
             _shopDataContext = dataContext;
             _requestMapper = requestMapper;
-            _jsonResponseFactory = new JsonResponseFactory();
+            _jsonResponseFactory = jsonResponseFactory;
         }
 
         [HttpGet]
@@ -57,16 +59,6 @@ namespace AKHWebshop.Controllers
         [HttpPost]
         public ActionResult CreateProduct([FromBody] CreateProductRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                foreach (var modelState in ModelState.Values)
-                {
-                    return (JsonResult) _jsonResponseFactory.CreateResponse(
-                        422, modelState.Errors[0].ErrorMessage
-                    );
-                }
-            }
-
             Product productToSave = _requestMapper.CreateProductRequestToProduct(request);
             _shopDataContext.Products.Add(productToSave);
             _shopDataContext.SaveChanges();
@@ -77,16 +69,6 @@ namespace AKHWebshop.Controllers
         [Route("{id}")]
         public ActionResult UpdateProduct(string id, [FromBody] UpdateProductRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                foreach (var modelState in ModelState.Values)
-                {
-                    return (JsonResult) _jsonResponseFactory.CreateResponse(
-                        422, modelState.Errors[0].ErrorMessage
-                    );
-                }
-            }
-
             Product productToUpdate = _requestMapper.UpdateProductRequestToProduct(request);
             productToUpdate.Id = Guid.Parse(id);
 
@@ -103,21 +85,11 @@ namespace AKHWebshop.Controllers
                 _shopDataContext
                     .Products
                     .Include(product => product.Amount)
-                    .FirstOrDefault(product => product.Id == Guid.Parse(id));
+                    .FirstOrDefault(product => product.Id == Guid.Parse(id)) ?? null;
 
             if (subjectProduct == null)
             {
                 return _jsonResponseFactory.CreateResponse(404, "product not found");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                foreach (var modelState in ModelState.Values)
-                {
-                    return (JsonResult) _jsonResponseFactory.CreateResponse(
-                        422, modelState.Errors[0].ErrorMessage
-                    );
-                }
             }
 
             subjectProduct.Amount = request.SizeRecords;

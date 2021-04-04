@@ -4,7 +4,11 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AKHWebshop.Models;
 using AKHWebshop.Models.Auth;
+using AKHWebshop.Models.Http.Request;
+using AKHWebshop.Models.Http.Request.DTO;
+using AKHWebshop.Models.Http.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,41 +21,45 @@ namespace AKHWebshop.Controllers
     {
         private UserManager<AppUser> _userManager;
         private JwtTokenHelper _tokenHelper;
+        private IActionResultFactory<JsonResult> _jsonResponseFactory;
+        private IRequestMapper _requestMapper;
 
-        public AuthController(UserManager<AppUser> userManager, JwtTokenHelper tokenHelper)
+        public AuthController(
+            UserManager<AppUser> userManager,
+            IActionResultFactory<JsonResult> jsonResponeFactory,
+            IRequestMapper requestMapper,
+            JwtTokenHelper tokenHelper
+        )
         {
             _userManager = userManager;
+            _jsonResponseFactory = jsonResponeFactory;
+            _requestMapper = requestMapper;
             _tokenHelper = tokenHelper;
         }
 
         [HttpPost]
-        public async Task<JsonResult> Regiser([FromBody] AppUser user)
+        public async Task<ActionResult> Register([FromBody] RegisterUserRequest request)
         {
+            AppUser user = _requestMapper.RegisterRequestToAppUser(request);
             var result = await _userManager.CreateAsync(user, user.Password);
-            return new JsonResult(result);
+            return _jsonResponseFactory.CreateResponse(200, result);
         }
 
         [HttpPost]
         [Route("login")]
-        public JsonResult Login([FromBody] AppUser inputForm)
+        public async Task<ActionResult> Login([FromBody] LoginRequest request)
         {
-            AppUser? user = _userManager.FindByNameAsync(inputForm.UserName).Result;
-            bool userNotFount = user == null;
-            if (userNotFount)
-                return new JsonResult(new {error = "username or password wrong"});
+            AppUser user = await _userManager.FindByNameAsync(request.UserName);
 
-            string token = _tokenHelper.GenerateToken(
-                new[]
-                {
-                    new Claim(ClaimTypes.Name, user!.UserName),
-                });
+            string token =
+                _tokenHelper
+                    .GenerateToken(new[]
+                    {
+                        new Claim(ClaimTypes.Name, user!.UserName),
+                    });
 
-            HttpContext.Response.Cookies.Append("_uc", token);
-
-            return new JsonResult("ok")
-            {
-                ContentType = "application/json", StatusCode = 200
-            };
+            HttpContext.Response.Cookies.Append(K.userAuthCookieName, token);
+            return _jsonResponseFactory.CreateResponse(200, "ok");
         }
     }
 }
