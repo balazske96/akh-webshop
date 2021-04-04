@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AKHWebshop.Models;
 using AKHWebshop.Models.Http.Request;
 using AKHWebshop.Models.Http.Request.DTO;
@@ -36,55 +37,55 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetAllProduct([FromQuery] int? skip = null, [FromQuery] int? limit = null)
+        public async Task<ActionResult> GetAllProduct([FromQuery] int? skip = null, [FromQuery] int? limit = null)
         {
             int actualLimit = limit ?? 10;
             int actualSkip = skip ?? 0;
-            IEnumerable<Product> products = _shopDataContext.Products
+            IEnumerable<Product> products = await _shopDataContext.Products
                 .Skip(actualSkip)
                 .Take(actualLimit)
-                .ToList();
+                .ToListAsync();
             return _jsonResponseFactory.CreateResponse(200, products);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public ActionResult GetProductById(string id)
+        public async Task<ActionResult> GetProductById(string id)
         {
-            var selectedProduct = _shopDataContext.Products.Find(Guid.Parse(id));
+            var selectedProduct = await _shopDataContext.Products.FindAsync(Guid.Parse(id));
             return _jsonResponseFactory.CreateResponse(200, selectedProduct);
         }
 
         [HttpPost]
-        public ActionResult CreateProduct([FromBody] CreateProductRequest request)
+        public async Task<ActionResult> CreateProduct([FromBody] CreateProductRequest request)
         {
             Product productToSave = _requestMapper.CreateProductRequestToProduct(request);
             _shopDataContext.Products.Add(productToSave);
-            _shopDataContext.SaveChanges();
+            await _shopDataContext.SaveChangesAsync();
             return _jsonResponseFactory.CreateResponse(200, productToSave);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult UpdateProduct(string id, [FromBody] UpdateProductRequest request)
+        public async Task<ActionResult> UpdateProduct(string id, [FromBody] UpdateProductRequest request)
         {
             Product productToUpdate = _requestMapper.UpdateProductRequestToProduct(request);
             productToUpdate.Id = Guid.Parse(id);
 
             _shopDataContext.Products.Update(productToUpdate);
-            _shopDataContext.SaveChanges();
+            await _shopDataContext.SaveChangesAsync();
             return _jsonResponseFactory.CreateResponse(200, productToUpdate);
         }
 
         [HttpPut]
         [Route("{id}/update-amount")]
-        public ActionResult UpdateProductAmount(string id, [FromBody] UpdateProductAmountRequest request)
+        public async Task<ActionResult> UpdateProductAmount(string id, [FromBody] UpdateProductAmountRequest request)
         {
             Product? subjectProduct =
-                _shopDataContext
+                await _shopDataContext
                     .Products
                     .Include(product => product.Amount)
-                    .FirstOrDefault(product => product.Id == Guid.Parse(id)) ?? null;
+                    .FirstOrDefaultAsync(product => product.Id == Guid.Parse(id)) ?? null;
 
             if (subjectProduct == null)
             {
@@ -94,23 +95,23 @@ namespace AKHWebshop.Controllers
             subjectProduct.Amount = request.SizeRecords;
 
             _shopDataContext.Products.Update(subjectProduct);
-            _shopDataContext.SaveChanges();
+            await _shopDataContext.SaveChangesAsync();
 
             return _jsonResponseFactory.CreateResponse(200, subjectProduct);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public ActionResult DeleteProduct(string id)
+        public async Task<ActionResult> DeleteProduct(string id)
         {
-            Product? subject = _shopDataContext.Products.Find(Guid.Parse(id));
+            Product? subject = await _shopDataContext.Products.FindAsync(Guid.Parse(id));
             if (subject == null)
             {
                 return _jsonResponseFactory.CreateResponse(404, "product not found");
             }
 
             _shopDataContext.Remove(subject);
-            _shopDataContext.SaveChanges();
+            await _shopDataContext.SaveChangesAsync();
 
             return _jsonResponseFactory.CreateResponse(200, "product deleted");
         }

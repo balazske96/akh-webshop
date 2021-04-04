@@ -82,9 +82,9 @@ namespace AKHWebshop.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public JsonResult UpdateOrder(string id, [FromBody] UpdateOrderRequest request)
+        public async Task<ActionResult> UpdateOrder(string id, [FromBody] UpdateOrderRequest request)
         {
-            Order subjectOrder = _dataContext.Orders.Find(Guid.Parse(id));
+            Order subjectOrder = await _dataContext.Orders.FindAsync(Guid.Parse(id));
             if (subjectOrder == null)
                 return _jsonResponseFactory.CreateResponse(420,
                     "order with the specified id does not exist");
@@ -92,16 +92,16 @@ namespace AKHWebshop.Controllers
             Order mappedOrder = _requestMapper.UpdateOrderRequestToOrder(request);
             _modelMerger.CopyValues(subjectOrder, mappedOrder);
             _dataContext.Update(mappedOrder);
-            _dataContext.SaveChanges();
+            await _dataContext.SaveChangesAsync();
 
             return _jsonResponseFactory.CreateResponse(200, mappedOrder);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public JsonResult DeletedOrder(string id)
+        public async Task<ActionResult> DeletedOrder(string id)
         {
-            Order subjectOrder = _dataContext.Orders.Find(Guid.Parse(id));
+            Order subjectOrder = await _dataContext.Orders.FindAsync(Guid.Parse(id));
 
             if (subjectOrder == null)
             {
@@ -113,7 +113,7 @@ namespace AKHWebshop.Controllers
             }
 
             _dataContext.Orders.Remove(subjectOrder);
-            _dataContext.SaveChanges();
+            await _dataContext.SaveChangesAsync();
 
             return _jsonResponseFactory.CreateResponse(200, "order deleted");
         }
