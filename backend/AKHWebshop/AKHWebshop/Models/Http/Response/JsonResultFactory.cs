@@ -15,7 +15,8 @@ namespace AKHWebshop.Models.Http.Response
 
             return new JsonResult(message)
             {
-                ContentType = "application/json", StatusCode = statusCode
+                ContentType = "application/json",
+                StatusCode = statusCode,
             };
         }
     }
