@@ -3,17 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Runtime.Intrinsics.X86;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
-using Persistence;
 
 namespace AKHWebshop.Models.Shop.Data
 {
     [Table("product")]
-    public class Product : IHasId
+    public class Product
     {
         [Required]
         [JsonPropertyName("id")]
@@ -45,6 +41,5 @@ namespace AKHWebshop.Models.Shop.Data
         [JsonPropertyName("price")]
         [Column("price")]
         public uint Price { get; set; }
-
     }
 }

@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using Persistence;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace AKHWebshop.Models.Shop.Data
 {
     [Table("order")]
-    public class Order : DatedEntity, IIdentifiable, IAddressable, IHasId
+    public class Order : DatedEntity, IIdentifiable, IAddressable
     {
         [Required]
         [JsonPropertyName("id")]

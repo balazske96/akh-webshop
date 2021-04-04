@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using AKHWebshop.Models.Shop.Data;
 using FluentValidation;
-using Persistence;
 
 namespace AKHWebshop.Models.Http.Request.Validators
 {

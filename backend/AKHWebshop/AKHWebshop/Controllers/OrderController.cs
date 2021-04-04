@@ -49,10 +49,10 @@ namespace AKHWebshop.Controllers
             int actualSkip = skip ?? 0;
             int actualLimit = limit ?? 10;
 
-            List<Order> products = _dataContext.Orders
+            List<Order> products = await _dataContext.Orders
                 .Skip(actualSkip)
                 .Take(actualLimit)
-                .ToList();
+                .ToListAsync();
 
             return _jsonResponseFactory.CreateResponse(200, products);
         }
@@ -61,7 +61,7 @@ namespace AKHWebshop.Controllers
         [Route("{id}")]
         public async Task<ActionResult> GetOrder(string id)
         {
-            Order? result = _dataContext.Orders.Find(Guid.Parse(id));
+            Order? result = await _dataContext.Orders.FindAsync(Guid.Parse(id));
             if (result == null)
                 return _jsonResponseFactory.CreateResponse(420,
                     "order with the specified id does not exist");

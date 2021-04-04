@@ -1,7 +1,5 @@
 #nullable enable
 using System;
-using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AKHWebshop.Models;

@@ -35,8 +35,4 @@
       <Compile Remove="Models\Shop\Data\OrderAddress.cs" />
       <Compile Remove="Models\Shop\Data\Identity.cs" />
     </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Persistence\Persistence.csproj" />
-    </ItemGroup>
 </Project>
