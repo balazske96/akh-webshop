@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AKHWebshop.Models.Http.Request;
-using AKHWebshop.Models.Http.Request.DTO;
+using AKHWebshop.Models.Http.Request.Abstract;
+using AKHWebshop.Models.Http.Request.Concrete;
 using AKHWebshop.Models.Http.Response;
-using AKHWebshop.Models.Mail;
 using AKHWebshop.Models.Shop.Data;
+using AKHWebshop.Services.DTO;
+using AKHWebshop.Services.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,12 +21,12 @@ namespace AKHWebshop.Controllers
     [Route("[controller]")]
     public class OrderController : ControllerBase
     {
-        private ILogger<OrderController> _logger;
-        private IAkhMailClient _mailClient;
-        private ShopDataContext _dataContext;
-        private IActionResultFactory<JsonResult> _jsonResponseFactory;
-        private IRequestMapper _requestMapper;
-        private IModelMerger _modelMerger;
+        private readonly ILogger<OrderController> _logger;
+        private readonly IAkhMailClient _mailClient;
+        private readonly ShopDataContext _dataContext;
+        private readonly IActionResultFactory<JsonResult> _jsonResponseFactory;
+        private readonly IRequestMapper _requestMapper;
+        private readonly IModelMerger _modelMerger;
 
         public OrderController(
             ILogger<OrderController> logger,
@@ -44,7 +46,7 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllOrder(GetAllOrderRequest request)
+        public async Task<ActionResult> GetAllOrder([FromQuery] GetLimitedItemRequest request)
         {
             List<Order> products = await _dataContext.Orders
                 .Skip(request.Skip)
@@ -66,7 +68,7 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateOrder([FromBody] CreateOrderRequest request)
+        public async Task<ActionResult> CreateOrder(CreateOrderRequest request)
         {
             Order order = _requestMapper.CreateOrderRequestToOrder(request);
 

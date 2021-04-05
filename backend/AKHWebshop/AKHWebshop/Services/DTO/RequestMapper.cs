@@ -1,8 +1,10 @@
 using AKHWebshop.Models.Auth;
+using AKHWebshop.Models.Http.Request;
+using AKHWebshop.Models.Http.Request.Concrete;
 using AKHWebshop.Models.Shop.Data;
 using AutoMapper;
 
-namespace AKHWebshop.Models.Http.Request.DTO
+namespace AKHWebshop.Services.DTO
 {
     public class RequestMapper : IRequestMapper
     {

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,10 +5,15 @@ using System.Text.Json.Serialization;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AKHWebshop.Models.Http.Request
+namespace AKHWebshop.Models.Http.Request.Concrete
 {
-    public class CreateOrderRequest
+    public class UpdateOrderRequest
     {
+        [FromRoute]
+        [Required]
+        [RegularExpression(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?")]
+        public string Id { get; set; }
+
         [FromBody]
         [Required]
         [JsonPropertyName("country")]

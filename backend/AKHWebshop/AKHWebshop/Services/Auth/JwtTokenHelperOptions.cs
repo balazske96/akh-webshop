@@ -1,4 +1,4 @@
-namespace AKHWebshop.Models.Auth
+namespace AKHWebshop.Services.Auth
 {
     public class JwtTokenHelperOptions
     {

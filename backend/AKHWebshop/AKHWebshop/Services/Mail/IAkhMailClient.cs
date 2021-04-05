@@ -1,6 +1,6 @@
 using AKHWebshop.Models.Shop.Data;
 
-namespace AKHWebshop.Models.Mail
+namespace AKHWebshop.Services.Mail
 {
     public interface IAkhMailClient
     {

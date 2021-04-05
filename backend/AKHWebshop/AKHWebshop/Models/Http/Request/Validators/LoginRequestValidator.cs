@@ -1,5 +1,6 @@
 using System.Linq;
 using AKHWebshop.Models.Auth;
+using AKHWebshop.Models.Http.Request.Concrete;
 using AKHWebshop.Models.Shop.Data;
 using FluentValidation;
 
@@ -7,7 +8,7 @@ namespace AKHWebshop.Models.Http.Request.Validators
 {
     public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {
-        LoginRequestValidator(ShopDataContext dataContext)
+        public LoginRequestValidator(ShopDataContext dataContext)
         {
             RuleFor(request => request)
                 .Custom((request, context) =>

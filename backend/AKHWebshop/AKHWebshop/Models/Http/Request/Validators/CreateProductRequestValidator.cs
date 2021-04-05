@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AKHWebshop.Models.Http.Request.Concrete;
 using AKHWebshop.Models.Shop.Data;
 using FluentValidation;
 
@@ -21,17 +22,17 @@ namespace AKHWebshop.Models.Http.Request.Validators
 
             // Validate for duplicated names
             RuleFor(product => product.Name).Must(name =>
-                shopDataContext.Products.Any(prod => prod.Name == name)
+                !shopDataContext.Products.Any(prod => prod.Name == name)
             ).WithMessage("product with the specified name already exists");
 
             // Validate for duplicated image names
             RuleFor(product => product.ImageName).Must(name =>
-                shopDataContext.Products.Any(prod => prod.ImageName == name)
+                !shopDataContext.Products.Any(prod => prod.ImageName == name)
             ).WithMessage("product with the specified image name already exists");
 
             // Validate for duplicated display names
             RuleFor(product => product.DisplayName).Must(name =>
-                shopDataContext.Products.Any(prod => prod.DisplayName == name)
+                !shopDataContext.Products.Any(prod => prod.DisplayName == name)
             ).WithMessage("product with the specified display name already exists");
 
             // Validate for price

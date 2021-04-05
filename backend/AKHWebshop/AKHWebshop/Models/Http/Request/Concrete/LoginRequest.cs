@@ -1,16 +1,20 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AKHWebshop.Models.Http.Request
+namespace AKHWebshop.Models.Http.Request.Concrete
 {
     public class LoginRequest
     {
+        [FromBody]
         [Required]
         [JsonPropertyName("username")]
         public string UserName { get; set; }
 
 
-        [JsonPropertyName("password")] public string Password { get; set; }
+        [FromBody]
+        [Required]
+        [JsonPropertyName("password")]
+        public string Password { get; set; }
     }
 }

@@ -1,10 +1,7 @@
 using System;
-using System.ComponentModel;
 using AKHWebshop.Models.Shop.Data;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
-namespace AKHWebshop.Models.Mail
+namespace AKHWebshop.Services.Mail
 {
     public class AkhMailClient : IAkhMailClient
     {

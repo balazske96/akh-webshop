@@ -5,16 +5,10 @@ using System.Text.Json.Serialization;
 using AKHWebshop.Models.Shop.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AKHWebshop.Models.Http.Request
+namespace AKHWebshop.Models.Http.Request.Concrete
 {
-    public class UpdateOrderRequest
+    public class CreateOrderRequest
     {
-        [FromQuery]
-        [Required]
-        [JsonPropertyName("id")]
-        [RegularExpression(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?")]
-        public string Id { get; set; }
-
         [FromBody]
         [Required]
         [JsonPropertyName("country")]

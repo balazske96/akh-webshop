@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AKHWebshop.Models.Auth;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AKHWebshop.Models.Auth
+namespace AKHWebshop.Services.Auth
 {
     public class JwtTokenHelper
     {

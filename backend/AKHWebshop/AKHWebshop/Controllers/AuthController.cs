@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using AKHWebshop.Models;
 using AKHWebshop.Models.Auth;
 using AKHWebshop.Models.Http.Request;
-using AKHWebshop.Models.Http.Request.DTO;
+using AKHWebshop.Models.Http.Request.Concrete;
 using AKHWebshop.Models.Http.Response;
+using AKHWebshop.Services.Auth;
+using AKHWebshop.Services.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +38,8 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Register([FromBody] RegisterUserRequest request)
+        [Route("register")]
+        public async Task<ActionResult> Register(RegisterUserRequest request)
         {
             AppUser user = _requestMapper.RegisterRequestToAppUser(request);
             var result = await _userManager.CreateAsync(user, user.Password);
@@ -45,7 +48,7 @@ namespace AKHWebshop.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult> Login(LoginRequest request)
         {
             AppUser user = await _userManager.FindByNameAsync(request.UserName);
 

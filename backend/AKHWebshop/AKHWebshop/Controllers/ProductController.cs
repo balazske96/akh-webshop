@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AKHWebshop.Models;
 using AKHWebshop.Models.Http.Request;
-using AKHWebshop.Models.Http.Request.DTO;
+using AKHWebshop.Models.Http.Request.Abstract;
+using AKHWebshop.Models.Http.Request.Concrete;
 using AKHWebshop.Models.Http.Response;
 using AKHWebshop.Models.Shop.Data;
+using AKHWebshop.Services.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,9 +21,9 @@ namespace AKHWebshop.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ILogger<Product> _logger;
-        private IRequestMapper _requestMapper;
-        private IActionResultFactory<JsonResult> _jsonResponseFactory;
-        private ShopDataContext _shopDataContext;
+        private readonly IRequestMapper _requestMapper;
+        private readonly IActionResultFactory<JsonResult> _jsonResponseFactory;
+        private readonly ShopDataContext _shopDataContext;
 
         public ProductController(
             ILogger<Product> logger,
@@ -37,13 +39,11 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllProduct([FromQuery] int? skip = null, [FromQuery] int? limit = null)
+        public async Task<ActionResult> GetAllProduct([FromQuery] GetLimitedItemRequest request)
         {
-            int actualLimit = limit ?? 10;
-            int actualSkip = skip ?? 0;
             IEnumerable<Product> products = await _shopDataContext.Products
-                .Skip(actualSkip)
-                .Take(actualLimit)
+                .Skip(request.Skip)
+                .Take(request.Limit)
                 .ToListAsync();
             return _jsonResponseFactory.CreateResponse(200, products);
         }
@@ -57,7 +57,7 @@ namespace AKHWebshop.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateProduct([FromBody] CreateProductRequest request)
+        public async Task<ActionResult> CreateProduct(CreateProductRequest request)
         {
             Product productToSave = _requestMapper.CreateProductRequestToProduct(request);
             _shopDataContext.Products.Add(productToSave);
@@ -67,10 +67,10 @@ namespace AKHWebshop.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<ActionResult> UpdateProduct(string id, [FromBody] UpdateProductRequest request)
+        public async Task<ActionResult> UpdateProduct(UpdateProductRequest request)
         {
             Product productToUpdate = _requestMapper.UpdateProductRequestToProduct(request);
-            productToUpdate.Id = Guid.Parse(id);
+            productToUpdate.Id = Guid.Parse(request.Id);
 
             _shopDataContext.Products.Update(productToUpdate);
             await _shopDataContext.SaveChangesAsync();
@@ -79,18 +79,13 @@ namespace AKHWebshop.Controllers
 
         [HttpPut]
         [Route("{id}/update-amount")]
-        public async Task<ActionResult> UpdateProductAmount(string id, [FromBody] UpdateProductAmountRequest request)
+        public async Task<ActionResult> UpdateProductAmount(UpdateProductAmountRequest request)
         {
-            Product? subjectProduct =
+            Product subjectProduct =
                 await _shopDataContext
                     .Products
                     .Include(product => product.Amount)
-                    .FirstOrDefaultAsync(product => product.Id == Guid.Parse(id)) ?? null;
-
-            if (subjectProduct == null)
-            {
-                return _jsonResponseFactory.CreateResponse(404, "product not found");
-            }
+                    .FirstOrDefaultAsync(product => product.Id == Guid.Parse(request.Id));
 
             subjectProduct.Amount = request.SizeRecords;
 

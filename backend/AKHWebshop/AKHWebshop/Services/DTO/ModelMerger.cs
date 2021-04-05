@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace AKHWebshop.Models.Http.Request.DTO
+namespace AKHWebshop.Services.DTO
 {
     public class ModelMerger : IModelMerger
     {

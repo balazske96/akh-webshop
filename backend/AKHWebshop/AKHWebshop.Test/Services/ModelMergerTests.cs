@@ -1,5 +1,5 @@
-using AKHWebshop.Models.Http.Request.DTO;
 using AKHWebshop.Models.Shop.Data;
+using AKHWebshop.Services.DTO;
 using Xunit;
 
 namespace AKHWebshop.Test.Services
